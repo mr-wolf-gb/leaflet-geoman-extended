@@ -1,0 +1,44 @@
+/* ============================================
+   Text Modal - Quill Editor Specific Styles
+   Base modal styles are in modals.css
+   ============================================ */
+
+/* Text Container */
+.pm-text-modal-text-container {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  background: white;
+}
+
+/* Quill Editor Container */
+.pm-text-modal-editor-container {
+  min-height: 90px;
+}
+
+.pm-text-modal-editor-container .ql-toolbar {
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f5f5f5;
+}
+
+.pm-text-modal-editor-container .ql-container {
+  border: none;
+  font-size: 14px;
+  min-height: 50px;
+}
+
+.pm-text-modal-editor-container .ql-editor {
+  min-height: 50px;
+  padding: 12px;
+}
+
+.pm-text-modal-editor-container .ql-editor.ql-blank::before {
+  color: #999;
+  font-style: normal;
+}
+
+/* RTL Support for Quill */
+.ql-direction-rtl {
+  direction: rtl;
+}

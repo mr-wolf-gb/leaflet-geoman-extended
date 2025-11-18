@@ -1,0 +1,58 @@
+/* Dangerous Goods Zones Styles */
+/* NOTE: Modal styles for dangerous goods are now in modals.css */
+
+.leaflet-pm-icon-dangerous-goods {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iOSIgZmlsbD0iI2ZmMDAwMCIgZmlsbC1vcGFjaXR5PSIwLjMiIHN0cm9rZT0iI2ZmMDAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjYiIGZpbGw9IiNmZjg4MDAiIGZpbGwtb3BhY2l0eT0iMC4zIiBzdHJva2U9IiNmZjg4MDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSIzIiBmaWxsPSIjZmZmZjAwIiBmaWxsLW9wYWNpdHk9IjAuMyIgc3Ryb2tlPSIjZmZmZjAwIiBzdHJva2Utd2lkdGg9IjIiLz4KPHN2Zz4K');
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.dangerous-goods-center-marker {
+  background: white;
+  border: 2px solid #333;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dangerous-goods-zone-label {
+  pointer-events: none;
+}
+
+.dangerous-goods-zone-label div {
+  transform: translate(-50%, -50%);
+}
+
+/* Visual feedback when dangerous goods zones are in edit mode */
+.leaflet-pm-dragging .dangerous-goods-center-marker,
+.leaflet-pm-dragging .dangerous-goods-zone-label {
+  opacity: 0.8;
+}
+
+/* Cursor feedback for draggable dangerous goods zones */
+.leaflet-container .leaflet-pm-dragging {
+  cursor: move !important;
+}
+
+/* Zone circle styles */
+.leaflet-interactive[data-zone='red'] {
+  stroke: #ff0000 !important;
+  fill: #ff0000 !important;
+}
+
+.leaflet-interactive[data-zone='orange'] {
+  stroke: #ff8800 !important;
+  fill: #ff8800 !important;
+}
+
+.leaflet-interactive[data-zone='yellow'] {
+  stroke: #ffff00 !important;
+  fill: #ffff00 !important;
+}
+
+.leaflet-interactive[data-zone='green'] {
+  stroke: #00ff00 !important;
+  fill: #00ff00 !important;
+}

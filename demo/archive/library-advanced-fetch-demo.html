@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Library Advanced Fetch Demo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@latest/dist/leaflet.css" />
+    <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #map { height: 400px; margin: 20px 0; }
+        .demo-section { 
+            background: #f9f9f9; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px; 
+            border: 1px solid #ddd; 
+        }
+        .demo-section h3 { margin-top: 0; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { 
+            display: block; 
+            font-weight: bold; 
+            margin-bottom: 5px; 
+            color: #555; 
+        }
+        .form-group input, .form-group select, .form-group textarea { 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .form-group textarea { height: 80px; resize: vertical; }
+        .form-row { display: flex; gap: 15px; }
+        .form-row .form-group { flex: 1; }
+        button { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            background: #4CAF50; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 14px;
+        }
+        button:hover { background: #45a049; }
+        button.secondary { background: #2196F3; }
+        button.secondary:hover { background: #1976D2; }
+        button.danger { background: #f44336; }
+        button.danger:hover { background: #d32f2f; }
+        .event-log { 
+            background: #f5f5f5; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            padding: 15px; 
+            height: 200px; 
+            overflow-y: auto; 
+            font-family: monospace; 
+            font-size: 12px; 
+        }
+        .event-log .event { margin-bottom: 5px; padding: 2px 0; }
+        .event-log .event.error { color: #f44336; }
+        .event-log .event.warning { color: #ff9800; }
+        .event-log .event.success { color: #4CAF50; }
+        .auth-section { 
+            border: 1px solid #e0e0e0; 
+            padding: 15px; 
+            border-radius: 4px; 
+            margin-top: 10px; 
+        }
+        .auth-section.hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <article>
+            <h1>Library Advanced Fetch Demo</h1>
+            <h3>
+                Demonstration of advanced URL fetching with CORS, authentication, and TLS options
+            </h3>
+        </article>
+
+        <article>
+            <div class="demo-section">
+                <h3>Basic URL Configuration</h3>
+                
+                <div class="form-group">
+                    <label>JSON URL:</label>
+                    <input type="text" id="urlInput" placeholder="Enter JSON URL..." value="test-categories.json">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>HTTP Method:</label>
+                        <select id="methodSelect">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="PATCH">PATCH</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Timeout (ms):</label>
+                        <input type="number" id="timeoutInput" value="10000" min="1000" max="60000">
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article>
+            <div class="demo-section">
+                <h3>CORS Configuration</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>CORS Mode:</label>
+                        <select id="corsMode">
+                            <option value="cors">cors</option>
+                            <option value="no-cors">no-cors</option>
+                            <option value="same-origin">same-origin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Credentials:</label>
+                        <select id="credentialsMode">
+                            <option value="same-origin">same-origin</option>
+                            <option value="include">include</option>
+                            <option value="omit">omit</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Redirect:</label>
+                        <select id="redirectMode">
+                            <option value="follow">follow</option>
+                            <option value="error">error</option>
+                            <option value="manual">manual</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Referrer Policy:</label>
+                        <select id="referrerPolicy">
+                            <option value="no-referrer-when-downgrade">no-referrer-when-downgrade</option>
+                            <option value="no-referrer">no-referrer</option>
+                            <option value="origin">origin</option>
+                            <option value="origin-when-cross-origin">origin-when-cross-origin</option>
+                            <option value="same-origin">same-origin</option>
+                            <option value="strict-origin">strict-origin</option>
+                            <option value="strict-origin-when-cross-origin">strict-origin-when-cross-origin</option>
+                            <option value="unsafe-url">unsafe-url</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article>
+            <div class="demo-section">
+                <h3>Authentication</h3>
+                
+                <div class="form-group">
+                    <label>Authentication Type:</label>
+                    <select id="authType" onchange="toggleAuthSections()">
+                        <option value="">None</option>
+                        <option value="basic">Basic Auth</option>
+                        <option value="bearer">Bearer Token</option>
+                        <option value="api-key">API Key</option>
+                    </select>
+                </div>
+                
+                <div id="basicAuthSection" class="auth-section hidden">
+                    <h4>Basic Authentication</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Username:</label>
+                            <input type="text" id="basicUsername" placeholder="Enter username">
+                        </div>
+                        <div class="form-group">
+                            <label>Password:</label>
+                            <input type="password" id="basicPassword" placeholder="Enter password">
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="bearerAuthSection" class="auth-section hidden">
+                    <h4>Bearer Token</h4>
+                    <div class="form-group">
+                        <label>Token:</label>
+                        <input type="text" id="bearerToken" placeholder="Enter bearer token">
+                    </div>
+                </div>
+                
+                <div id="apiKeyAuthSection" class="auth-section hidden">
+                    <h4>API Key</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>API Key:</label>
+                            <input type="text" id="apiKey" placeholder="Enter API key">
+                        </div>
+                        <div class="form-group">
+                            <label>Header Name:</label>
+                            <input type="text" id="apiKeyHeader" placeholder="X-API-Key" value="X-API-Key">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article>
+            <div class="demo-section">
+                <h3>Custom Headers</h3>
+                
+                <div class="form-group">
+                    <label>Custom Headers (JSON format):</label>
+                    <textarea id="customHeaders" placeholder='{"X-Custom-Header": "value", "Another-Header": "another-value"}'></textarea>
+                </div>
+            </div>
+        </article>
+
+        <article>
+            <div class="demo-section">
+                <h3>TLS/SSL Configuration</h3>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="rejectUnauthorized" checked> 
+                        Reject Unauthorized Certificates (Recommended)
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Note: In browser environments, certificate validation is handled by the browser and cannot be disabled via JavaScript.
+                    </small>
+                </div>
+            </div>
+        </article>
+
+        <article>
+            <div class="demo-section">
+                <h3>Actions</h3>
+                
+                <button onclick="loadWithCurrentSettings()">Load with Current Settings</button>
+                <button onclick="loadPresetBasicAuth()" class="secondary">Test Basic Auth</button>
+                <button onclick="loadPresetBearerToken()" class="secondary">Test Bearer Token</button>
+                <button onclick="loadPresetApiKey()" class="secondary">Test API Key</button>
+                <button onclick="loadPresetCORS()" class="secondary">Test CORS</button>
+                <button onclick="showCurrentConfig()" class="secondary">Show Config</button>
+                <button onclick="clearLog()" class="danger">Clear Log</button>
+            </div>
+        </article>
+
+        <article>
+            <div class="demo-section">
+                <h3>Event Log</h3>
+                <div id="eventLog" class="event-log"></div>
+            </div>
+        </article>
+
+        <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@latest/dist/leaflet.js"></script>
+    <script src="../dist/leaflet-geoman.js"></script>
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([51.505, -0.09], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        const eventLog = document.getElementById('eventLog');
+
+        // Event logging function
+        function logEvent(eventName, data = {}, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const eventDiv = document.createElement('div');
+            eventDiv.className = `event ${type}`;
+            eventDiv.innerHTML = `[${timestamp}] <strong>${eventName}</strong>: ${JSON.stringify(data)}`;
+            eventLog.appendChild(eventDiv);
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+
+        // Toggle authentication sections
+        function toggleAuthSections() {
+            const authType = document.getElementById('authType').value;
+            const sections = ['basicAuthSection', 'bearerAuthSection', 'apiKeyAuthSection'];
+            
+            sections.forEach(sectionId => {
+                document.getElementById(sectionId).classList.add('hidden');
+            });
+            
+            if (authType) {
+                document.getElementById(authType + 'AuthSection').classList.remove('hidden');
+            }
+        }
+
+        // Get current configuration
+        function getCurrentConfig() {
+            const config = {
+                url: document.getElementById('urlInput').value,
+                urlOptions: {
+                    cache: true,
+                    timeout: parseInt(document.getElementById('timeoutInput').value),
+                    method: document.getElementById('methodSelect').value,
+                    mode: document.getElementById('corsMode').value,
+                    credentials: document.getElementById('credentialsMode').value,
+                    redirect: document.getElementById('redirectMode').value,
+                    referrerPolicy: document.getElementById('referrerPolicy').value,
+                    headers: {},
+                    auth: null,
+                    tls: {
+                        rejectUnauthorized: document.getElementById('rejectUnauthorized').checked
+                    }
+                }
+            };
+
+            // Parse custom headers
+            const customHeadersText = document.getElementById('customHeaders').value.trim();
+            if (customHeadersText) {
+                try {
+                    config.urlOptions.headers = JSON.parse(customHeadersText);
+                } catch (error) {
+                    logEvent('Invalid JSON in custom headers', { error: error.message }, 'error');
+                }
+            }
+
+            // Handle authentication
+            const authType = document.getElementById('authType').value;
+            if (authType) {
+                config.urlOptions.auth = { type: authType };
+                
+                switch (authType) {
+                    case 'basic':
+                        config.urlOptions.auth.username = document.getElementById('basicUsername').value;
+                        config.urlOptions.auth.password = document.getElementById('basicPassword').value;
+                        break;
+                    case 'bearer':
+                        config.urlOptions.auth.token = document.getElementById('bearerToken').value;
+                        break;
+                    case 'api-key':
+                        config.urlOptions.auth.apiKey = document.getElementById('apiKey').value;
+                        config.urlOptions.auth.apiKeyHeader = document.getElementById('apiKeyHeader').value || 'X-API-Key';
+                        break;
+                }
+            }
+
+            return config;
+        }
+
+        // Load with current settings
+        async function loadWithCurrentSettings() {
+            const config = getCurrentConfig();
+            
+            if (!config.url) {
+                logEvent('URL Required', {}, 'error');
+                return;
+            }
+
+            logEvent('Loading with Advanced Settings', { 
+                url: config.url,
+                method: config.urlOptions.method,
+                mode: config.urlOptions.mode,
+                hasAuth: !!config.urlOptions.auth,
+                authType: config.urlOptions.auth?.type
+            });
+
+            // Set global options
+            map.pm.setGlobalOptions({
+                library: {
+                    enabled: true,
+                    url: config.url,
+                    json: null,
+                    autoLoad: true,
+                    urlOptions: config.urlOptions
+                }
+            });
+
+            // Try to load
+            try {
+                const success = await map.pm.Library.loadFromGlobalOptions();
+                if (success) {
+                    logEvent('Load Successful', {}, 'success');
+                } else {
+                    logEvent('Load Failed', {}, 'error');
+                }
+            } catch (error) {
+                logEvent('Load Error', { error: error.message }, 'error');
+            }
+        }
+
+        // Preset configurations
+        function loadPresetBasicAuth() {
+            document.getElementById('urlInput').value = 'https://httpbin.org/basic-auth/user/pass';
+            document.getElementById('authType').value = 'basic';
+            document.getElementById('basicUsername').value = 'user';
+            document.getElementById('basicPassword').value = 'pass';
+            toggleAuthSections();
+            logEvent('Basic Auth Preset Loaded', {});
+        }
+
+        function loadPresetBearerToken() {
+            document.getElementById('urlInput').value = 'https://httpbin.org/bearer';
+            document.getElementById('authType').value = 'bearer';
+            document.getElementById('bearerToken').value = 'your-bearer-token-here';
+            toggleAuthSections();
+            logEvent('Bearer Token Preset Loaded', {});
+        }
+
+        function loadPresetApiKey() {
+            document.getElementById('urlInput').value = 'https://api.example.com/data';
+            document.getElementById('authType').value = 'api-key';
+            document.getElementById('apiKey').value = 'your-api-key-here';
+            document.getElementById('apiKeyHeader').value = 'X-API-Key';
+            toggleAuthSections();
+            logEvent('API Key Preset Loaded', {});
+        }
+
+        function loadPresetCORS() {
+            document.getElementById('urlInput').value = 'https://api.github.com/repos/octocat/Hello-World';
+            document.getElementById('corsMode').value = 'cors';
+            document.getElementById('credentialsMode').value = 'omit';
+            document.getElementById('customHeaders').value = '{"User-Agent": "LibraryDemo/1.0"}';
+            logEvent('CORS Preset Loaded', {});
+        }
+
+        function showCurrentConfig() {
+            const config = getCurrentConfig();
+            logEvent('Current Configuration', config);
+        }
+
+        function clearLog() {
+            eventLog.innerHTML = '';
+        }
+
+        // Library event listeners
+        map.on('pm:library-url-loading-started', (e) => {
+            logEvent('URL Loading Started', { url: e.url }, 'info');
+        });
+
+        map.on('pm:library-url-loaded', (e) => {
+            logEvent('URL Loaded Successfully', {
+                url: e.url,
+                categoriesCount: e.categoriesCount,
+                totalItems: e.totalItems
+            }, 'success');
+        });
+
+        map.on('pm:library-url-error', (e) => {
+            logEvent('URL Load Error', {
+                url: e.url,
+                error: e.error
+            }, 'error');
+        });
+
+        map.on('pm:library-categories-loaded', (e) => {
+            logEvent('Categories Loaded', {
+                source: e.source,
+                categoriesCount: e.categories ? e.categories.length : 0
+            }, 'success');
+        });
+
+        // Enable library and add controls
+        map.pm.setGlobalOptions({
+            library: { enabled: true }
+        });
+        map.pm.addControls({ library: true });
+
+        // Initialize
+        logEvent('Advanced Fetch Demo Initialized', {});
+    </script>
+</body>
+</html>

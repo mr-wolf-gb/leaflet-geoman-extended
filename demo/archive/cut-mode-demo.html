@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cut Mode Demo - Leaflet-Geoman</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        #map { 
+            height: 100vh; 
+            width: 100vw; 
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-width: 380px;
+        }
+        h1 { 
+            margin: 0 0 15px 0; 
+            font-size: 20px; 
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .section {
+            margin: 20px 0;
+        }
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+        .shape-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .shape-item { 
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 13px;
+            border-left: 3px solid;
+        }
+        .shape-item.red { border-left-color: #e74c3c; }
+        .shape-item.blue { border-left-color: #3498db; }
+        .shape-item.green { border-left-color: #2ecc71; }
+        .shape-item.purple { border-left-color: #9b59b6; }
+        .shape-item.orange { border-left-color: #e67e22; }
+        
+        .shape-name { 
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .shape-desc {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+        .instructions {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .instructions strong {
+            color: #27ae60;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .instructions ol {
+            margin: 8px 0 0 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 4px 0;
+        }
+        .feature-badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div id="info">
+        <h1>✂️ Cut Mode Demo</h1>
+        
+        <div class="section">
+            <div class="section-title">Test Shapes</div>
+            <div class="shape-grid">
+                <div class="shape-item red">
+                    <div class="shape-name">Rectangle</div>
+                    <div class="shape-desc">Top-left</div>
+                </div>
+                <div class="shape-item blue">
+                    <div class="shape-name">Polygon</div>
+                    <div class="shape-desc">Top-right</div>
+                </div>
+                <div class="shape-item green">
+                    <div class="shape-name">Line</div>
+                    <div class="shape-desc">Bottom-left</div>
+                </div>
+                <div class="shape-item purple">
+                    <div class="shape-name">Circle</div>
+                    <div class="shape-desc">Bottom-center</div>
+                </div>
+                <div class="shape-item orange">
+                    <div class="shape-name">Circle 2-Point</div>
+                    <div class="shape-desc">Bottom-right</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="instructions">
+                <strong>How to Use</strong>
+                <ol>
+                    <li>Click the Cut tool (scissors icon)</li>
+                    <li>Draw a line across any shape</li>
+                    <li>Double-click to finish cutting</li>
+                    <li>Right-click pieces to Move/Rotate</li>
+                    <li>Each piece is independent!</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="feature-badge">✨ NEW: Cut with lines (2 points)</div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../dist/leaflet-geoman.js"></script>
+    
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([51.505, -0.09], 13);
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Add Geoman controls
+        map.pm.addControls({
+            position: 'topleft',
+            drawMarker: false,
+            drawCircleMarker: false,
+        });
+        
+        // Rectangle (Red) - Top-left
+        L.rectangle([
+            [51.515, -0.100],
+            [51.510, -0.095]
+        ], {
+            color: '#e74c3c',
+            fillColor: '#e74c3c',
+            fillOpacity: 0.4,
+            weight: 2
+        }).addTo(map);
+        
+        // Polygon (Blue) - Top-right
+        L.polygon([
+            [51.515, -0.090],
+            [51.515, -0.085],
+            [51.512, -0.085],
+            [51.510, -0.088],
+            [51.510, -0.090]
+        ], {
+            color: '#3498db',
+            fillColor: '#3498db',
+            fillOpacity: 0.4,
+            weight: 2
+        }).addTo(map);
+        
+        // Line (Green) - Bottom-left
+        L.polyline([
+            [51.505, -0.100],
+            [51.505, -0.095],
+            [51.500, -0.095]
+        ], {
+            color: '#2ecc71',
+            weight: 3
+        }).addTo(map);
+        
+        // Circle (Purple) - Bottom-center
+        L.circle([51.502, -0.090], {
+            radius: 250,
+            color: '#9b59b6',
+            fillColor: '#9b59b6',
+            fillOpacity: 0.4,
+            weight: 2
+        }).addTo(map);
+        
+        // Circle 2-Point (Orange) - Bottom-right
+        L.circle([51.502, -0.082], {
+            radius: 200,
+            color: '#e67e22',
+            fillColor: '#e67e22',
+            fillOpacity: 0.4,
+            weight: 2
+        }).addTo(map);
+        
+        // Log cut events
+        map.on('pm:cut', (e) => {
+            console.log('Cut event:', {
+                originalLayer: e.originalLayer._leaflet_id,
+                newLayer: e.layer._leaflet_id,
+                type: e.layer.constructor.name
+            });
+        });
+        
+        console.log('Cut Mode Demo loaded. Ready to test!');
+    </script>
+</body>
+</html>

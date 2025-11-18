@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaflet-Geoman - GeoJSON Import/Export Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Leaflet -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/js/all.min.js" integrity="sha512-6BTOlkauINO65nLhXhthZMtepgJSghyimIalb+crKRPhvhmsCdnIuGcVbR5/aQY2A+260iC1OPy1oCdB6pSSwQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Leaflet-Geoman -->
+    <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+    <script src="../dist/leaflet-geoman.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+
+      #map {
+        width: 100%;
+        height: 100vh;
+      }
+
+      .control-panel {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: white;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        max-width: 300px;
+      }
+
+      .control-panel h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 16px;
+      }
+
+      .control-panel button {
+        display: block;
+        width: 100%;
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .control-panel button:hover {
+        background: #45a049;
+      }
+
+      .control-panel button.secondary {
+        background: #2196F3;
+      }
+
+      .control-panel button.secondary:hover {
+        background: #0b7dda;
+      }
+
+      .control-panel button.danger {
+        background: #f44336;
+      }
+
+      .control-panel button.danger:hover {
+        background: #da190b;
+      }
+
+      .control-panel textarea {
+        width: 100%;
+        height: 150px;
+        margin-top: 10px;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 12px;
+        resize: vertical;
+      }
+
+      .control-panel .info {
+        margin-top: 10px;
+        padding: 8px;
+        background: #e3f2fd;
+        border-radius: 3px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <div class="control-panel">
+      <h3>GeoJSON Import/Export</h3>
+
+      <button onclick="exportGeoJSON()">Export All Layers</button>
+      <button onclick="exportDrawnOnly()">Export Drawn Layers Only</button>
+      <button class="secondary" onclick="importGeoJSON()">
+        Import GeoJSON
+      </button>
+      <button class="secondary" onclick="importAndClear()">
+        Import & Clear Existing
+      </button>
+      <button class="secondary" onclick="saveToFile()">
+        Save to File
+      </button>
+      <button class="danger" onclick="clearTextarea()">Clear Textarea</button>
+
+      <textarea id="geojson-output" placeholder="GeoJSON will appear here..."></textarea>
+
+      <div class="info">
+        <strong>Instructions:</strong><br />
+        1. Draw shapes using the toolbar<br />
+        2. Click "Export" to get GeoJSON<br />
+        3. Click "Save to File" to download<br />
+        4. Modify or paste GeoJSON<br />
+        5. Click "Import" to load it<br />
+        <br />
+        <strong>Supported:</strong> All layer types including circles, text, distance lines, library items, and dangerous goods zones with full style preservation!
+      </div>
+    </div>
+
+    <script>
+      // Initialize map
+      const map = L.map('map').setView([51.505, -0.09], 13);
+
+      // Add tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);
+
+      // Add Leaflet-Geoman controls
+      map.pm.addControls({
+        position: 'topleft',
+        drawPolygon: true,
+        drawPolyline: true,
+        drawCircle: true,
+        drawRectangle: true,
+        drawMarker: true,
+        drawCircleMarker: true,
+        drawText: true,
+        drawArrow: true,
+        drawFreehand: true,
+        drawDistanceLine: true,
+        drawDangerousGoodsZones: true,
+        drawCircle2Points: true,
+        drawCircle3Points: true,
+        cutPolygon: true,
+        editMode: true,
+        dragMode: true,
+        removalMode: true,
+        rotateMode: true,
+        scaleMode: true,
+        copyLayerMode: true,
+        styleEditor: true,
+        library: true
+      });
+
+      map.pm.setGlobalOptions({
+          pathOptions: {
+              color: '#3388ff',
+              weight: 3,
+              opacity: 0.8,
+              fillColor: '#3388ff',
+              fillOpacity: 0.2,
+          },
+          measurements: {
+              measurement: true,
+              showSegmentLength: true,
+              displayFormat: 'metric',
+              precision: 2,
+          },
+          snappable: true,
+          snapDistance: 20,
+          library: {
+              enabled: true,
+              url: 'demo-categories.json',
+              panelPosition: 'topleft',
+              autoLoad: true
+          }
+      });
+
+      // Get textarea element
+      const textarea = document.getElementById('geojson-output');
+
+      // Export all layers
+      function exportGeoJSON() {
+        const geojson = map.pm.exportGeoJSON();
+        textarea.value = JSON.stringify(geojson, null, 2);
+        console.log('Exported GeoJSON:', geojson);
+      }
+
+      // Export only drawn layers
+      function exportDrawnOnly() {
+        const geojson = map.pm.exportGeoJSON({ onlyDrawn: true });
+        textarea.value = JSON.stringify(geojson, null, 2);
+        console.log('Exported Drawn Layers:', geojson);
+      }
+
+      // Import GeoJSON
+      function importGeoJSON() {
+        try {
+          const geojsonText = textarea.value.trim();
+          if (!geojsonText) {
+            alert('Please paste GeoJSON in the textarea first');
+            return;
+          }
+
+          const geojson = JSON.parse(geojsonText);
+          const layers = map.pm.importGeoJSON(geojson, {
+            clearExisting: false,
+            markAsDrawn: true,
+          });
+
+          console.log('Imported layers:', layers);
+          alert(`Successfully imported ${layers.length} layer(s)`);
+        } catch (error) {
+          alert('Error importing GeoJSON: ' + error.message);
+          console.error('Import error:', error);
+        }
+      }
+
+      // Import and clear existing
+      function importAndClear() {
+        try {
+          const geojsonText = textarea.value.trim();
+          if (!geojsonText) {
+            alert('Please paste GeoJSON in the textarea first');
+            return;
+          }
+
+          const geojson = JSON.parse(geojsonText);
+          const layers = map.pm.importGeoJSON(geojson, {
+            clearExisting: true,
+            markAsDrawn: true,
+          });
+
+          console.log('Imported layers (cleared existing):', layers);
+          alert(`Cleared existing and imported ${layers.length} layer(s)`);
+        } catch (error) {
+          alert('Error importing GeoJSON: ' + error.message);
+          console.error('Import error:', error);
+        }
+      }
+
+      // Clear textarea
+      function clearTextarea() {
+        textarea.value = '';
+      }
+
+      // Save to file
+      function saveToFile() {
+        try {
+          const geojsonText = textarea.value.trim();
+          if (!geojsonText) {
+            alert('Please export first');
+            return;
+          }
+
+          const dataBlob = new Blob([geojsonText], { type: 'application/json' });
+          const url = URL.createObjectURL(dataBlob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'map-layers.geojson';
+          link.click();
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          alert('Error saving file: ' + error.message);
+          console.error('Save error:', error);
+        }
+      }
+
+      // Listen to export/import events
+      map.on('pm:export', (e) => {
+        console.log('Export event:', e);
+      });
+
+      map.on('pm:import', (e) => {
+        console.log('Import event:', e);
+      });
+
+      // Listen to layer creation
+      map.on('pm:create', (e) => {
+        console.log('Layer created:', e);
+      });
+    </script>
+  </body>
+</html>

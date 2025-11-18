@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Style Editor Demo - Leaflet Geoman</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Leaflet Geoman CSS -->
+  <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+    
+    .info-panel {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+      max-width: 300px;
+    }
+    
+    .info-panel h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    
+    .info-panel p {
+      margin: 8px 0;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .info-panel ul {
+      margin: 8px 0;
+      padding-left: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .info-panel li {
+      margin: 4px 0;
+    }
+    
+    .highlight {
+      background: #fff3cd;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  
+  <div class="info-panel">
+    <h3>🎨 Style Editor Demo</h3>
+    <p><strong>Instructions:</strong></p>
+    <ul>
+      <li>Draw shapes using the toolbar</li>
+      <li><span class="highlight">Right-click</span> on any shape</li>
+      <li>Select <span class="highlight">"Edit Style"</span></li>
+      <li>Customize colors, line weight, opacity, and more!</li>
+    </ul>
+    <p><strong>Features:</strong></p>
+    <ul>
+      <li>Color picker with iro.js</li>
+      <li>Stroke & Fill customization</li>
+      <li>🎨 <strong>Fill Patterns</strong> (NEW!)</li>
+      <li>Line styles (solid, dashed, dotted)</li>
+      <li>Opacity controls</li>
+      <li>Line cap & join options</li>
+    </ul>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Leaflet Geoman JS -->
+  <script src="../dist/leaflet-geoman.js"></script>
+  
+  <script>
+    // Initialize map
+    const map = L.map('map').setView([51.505, -0.09], 13);
+    
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Add Geoman controls
+    map.pm.addControls({
+      position: 'topleft',
+      drawCircle: true,
+      drawMarker: true,
+      drawPolygon: true,
+      drawPolyline: true,
+      drawRectangle: true,
+      drawCircleMarker: true,
+      editMode: true,
+      dragMode: true,
+      cutPolygon: true,
+      removalMode: true,
+      rotateMode: true,
+    });
+    
+    // Set default drawing styles
+    map.pm.setGlobalOptions({
+      pathOptions: {
+        color: '#3388ff',
+        fillColor: '#3388ff',
+        weight: 3,
+        opacity: 1,
+        fillOpacity: 0.2
+      }
+    });
+    
+    // Add some example shapes
+    const polygon = L.polygon([
+      [51.515, -0.09],
+      [51.52, -0.1],
+      [51.52, -0.08]
+    ], {
+      color: '#e74c3c',
+      fillColor: '#e74c3c',
+      weight: 4,
+      opacity: 0.8,
+      fillOpacity: 0.3
+    }).addTo(map);
+    
+    const circle = L.circle([51.508, -0.11], {
+      radius: 500,
+      color: '#2ecc71',
+      fillColor: '#2ecc71',
+      weight: 3,
+      opacity: 0.8,
+      fillOpacity: 0.2
+    }).addTo(map);
+    
+    const rectangle = L.rectangle([
+      [51.49, -0.08],
+      [51.5, -0.06]
+    ], {
+      color: '#9b59b6',
+      fillColor: '#9b59b6',
+      weight: 3,
+      opacity: 0.8,
+      fillOpacity: 0.25
+    }).addTo(map);
+    
+    // Log style changes
+    map.on('layeradd', (e) => {
+      const layer = e.layer;
+      if (layer.pm) {
+        layer.on('pm:stylechange', (styleEvent) => {
+          console.log('Style changed:', styleEvent.style);
+        });
+      }
+    });
+    
+    // Log when shapes are created
+    map.on('pm:create', (e) => {
+      console.log('Shape created:', e.shape);
+      
+      // Attach style change listener
+      e.layer.on('pm:stylechange', (styleEvent) => {
+        console.log('New shape style changed:', styleEvent.style);
+      });
+    });
+    
+    // Show welcome message
+    setTimeout(() => {
+      console.log('%c🎨 Style Editor Demo', 'font-size: 20px; font-weight: bold; color: #3388ff;');
+      console.log('%cRight-click on any shape and select "Edit Style" to customize its appearance!', 'font-size: 14px; color: #666;');
+    }, 500);
+  </script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Shapes - Leaflet-Geoman</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@latest/dist/leaflet.css" />
+    <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+        
+        .nav {
+            background: #f8f9fa;
+            padding: 0.5rem 0;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .nav a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+        
+        .demo-info {
+            background: #fff3cd;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .map-container { 
+            height: 600px; 
+            position: relative;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        #map { height: 100%; width: 100%; }
+        
+        .instructions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.95);
+            padding: 1rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            max-width: 300px;
+            z-index: 1000;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .feature-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1.5rem;
+        }
+        
+        .feature-card h4 { 
+            color: #495057; 
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-icon { 
+            font-size: 1.5rem; 
+            margin-right: 0.5rem; 
+        }
+        
+        .feature-card p { 
+            color: #6c757d; 
+            font-size: 0.9rem; 
+            line-height: 1.6; 
+            margin-bottom: 1rem;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 0.25rem 0;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .feature-list li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Advanced Shapes</h1>
+            <p>Specialized drawing tools for complex geometries</p>
+        </div>
+    </div>
+
+    <div class="nav">
+        <a href="basic-drawing.html">← Basic Drawing</a>
+        <a href="index.html">Main Demo</a>
+        <a href="measurement-demo.html">Measurements →</a>
+    </div>
+
+    <div class="container">
+        <div class="demo-info">
+            <h3>Advanced Shape Tools</h3>
+            <p>These specialized tools extend beyond basic shapes to provide advanced drawing capabilities including arrows, text labels, and cutting tools for complex geometric operations.</p>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="instructions">
+                <h4>Advanced Tools Guide</h4>
+                <ul style="margin-left: 1rem; color: #6c757d; font-size: 0.9rem;">
+                    <li><strong>Arrow:</strong> Click start point, then end point</li>
+                    <li><strong>Text:</strong> Click to place, enter text in modal</li>
+                    <li><strong>Cut:</strong> Draw line across shapes to split them</li>
+                    <li><strong>Freehand:</strong> Click and drag to draw smoothly</li>
+                    <li><strong>3-Point Circle:</strong> Click three points on circumference</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h4><span class="feature-icon">➡️</span>Arrow Tool</h4>
+                <p>Create directional arrows perfect for indicating flow, direction, or pointing to specific features on your map.</p>
+                <ul class="feature-list">
+                    <li>Click start point, then end point</li>
+                    <li>Customizable arrowhead size and style</li>
+                    <li>Editable after creation</li>
+                    <li>Rotatable and scalable</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4><span class="feature-icon">✏️</span>Text Labels</h4>
+                <p>Add text annotations and labels directly on the map with full styling control and positioning options.</p>
+                <ul class="feature-list">
+                    <li>Rich text editing modal</li>
+                    <li>Font size and color customization</li>
+                    <li>Draggable positioning</li>
+                    <li>HTML content support</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4><span class="feature-icon">✂️</span>Cut Tool</h4>
+                <p>Split existing polygons and lines by drawing a cutting line across them. Perfect for dividing areas or creating openings.</p>
+                <ul class="feature-list">
+                    <li>Cut polygons into multiple parts</li>
+                    <li>Split polylines at intersection points</li>
+                    <li>Maintains original styling</li>
+                    <li>Works with complex shapes</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4><span class="feature-icon">✋</span>Freehand Drawing</h4>
+                <p>Draw smooth, organic shapes by clicking and dragging. Ideal for natural boundaries and artistic annotations.</p>
+                <ul class="feature-list">
+                    <li>Smooth curve generation</li>
+                    <li>Touch device support</li>
+                    <li>Adjustable smoothing</li>
+                    <li>Convert to polygon option</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4><span class="feature-icon">⭕</span>3-Point Circle</h4>
+                <p>Create circles by clicking three points on the circumference. Perfect when you know specific points the circle should pass through.</p>
+                <ul class="feature-list">
+                    <li>Click three points on circumference</li>
+                    <li>Automatic radius calculation</li>
+                    <li>Precise geometric construction</li>
+                    <li>Useful for surveying applications</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4><span class="feature-icon">📐</span>2-Point Circle</h4>
+                <p>Draw circles by defining the diameter with two points. Useful when you know the exact diameter endpoints.</p>
+                <ul class="feature-list">
+                    <li>Click two points for diameter</li>
+                    <li>Center automatically calculated</li>
+                    <li>Perfect for precise measurements</li>
+                    <li>Engineering and design applications</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="demo-info">
+            <h3>Pro Tips</h3>
+            <p>All advanced shapes support the same editing features as basic shapes: drag to move, edit vertices, rotate, scale, and style customization. Use the context menu (right-click) for quick access to common operations.</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@latest/dist/leaflet.js"></script>
+    <script src="../dist/leaflet-geoman.js"></script>
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([51.505, -0.09], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add advanced drawing controls
+        map.pm.addControls({
+            position: 'topleft',
+            drawArrow: true,
+            drawText: true,
+            cutPolygon: true,
+            drawFreehand: true,
+            drawCircle: true,
+            drawCircle2Points: true,
+            drawCircle3Points: true,
+            editMode: true,
+            dragMode: true,
+            removalMode: true,
+            rotateMode: true,
+            scaleMode: true
+        });
+
+        // Set styling options
+        map.pm.setGlobalOptions({
+            pathOptions: {
+                color: '#e74c3c',
+                weight: 3,
+                opacity: 0.8,
+                fillColor: '#e74c3c',
+                fillOpacity: 0.2
+            }
+        });
+
+        // Add sample advanced shapes
+        setTimeout(() => {
+            // Sample arrow
+            const arrow = L.arrow([
+                [51.51, -0.08],
+                [51.505, -0.06]
+            ], {
+                color: '#2ecc71',
+                weight: 4
+            }).addTo(map);
+
+            // Sample text (if available)
+            if (L.textMarker) {
+                L.textMarker([51.515, -0.1], {
+                    text: 'Sample Text Label'
+                }).addTo(map);
+            }
+
+            // Sample freehand polygon (simulated)
+            const freehandPoints = [];
+            const centerLat = 51.5;
+            const centerLng = -0.12;
+            const radius = 0.01;
+            
+            for (let i = 0; i <= 20; i++) {
+                const angle = (i / 20) * 2 * Math.PI;
+                const variation = 0.3 + 0.7 * Math.random(); // Random variation
+                const lat = centerLat + radius * variation * Math.sin(angle);
+                const lng = centerLng + radius * variation * Math.cos(angle);
+                freehandPoints.push([lat, lng]);
+            }
+            
+            L.polygon(freehandPoints, {
+                color: '#9b59b6',
+                fillColor: '#9b59b6',
+                fillOpacity: 0.3,
+                weight: 2
+            }).addTo(map);
+
+        }, 1000);
+
+        // Event handlers
+        map.on('pm:create', (e) => {
+            console.log('Advanced shape created:', e.shape, e.layer);
+            
+            // Handle text creation
+            if (e.shape === 'Text') {
+                console.log('Text content:', e.layer.pm ? e.layer.pm.getText() : 'N/A');
+            }
+        });
+
+        map.on('pm:cut', (e) => {
+            console.log('Shape cut:', e.originalLayer, 'into', e.layer);
+        });
+
+        map.on('pm:edit', (e) => {
+            console.log('Advanced shape edited:', e.layer);
+        });
+    </script>
+</body>
+</html>

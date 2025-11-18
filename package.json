@@ -1,0 +1,86 @@
+{
+  "name": "leaflet-geoman-extended",
+  "version": "2.18.3",
+  "description": "Extended version of Leaflet-Geoman - A comprehensive Leaflet plugin for drawing, editing, and measuring geometry layers with advanced features",
+  "keywords": [
+    "leaflet",
+    "geoman",
+    "polygon management",
+    "geometry editing",
+    "map data",
+    "map overlay",
+    "polygon",
+    "geojson",
+    "leaflet-draw",
+    "data-field-geojson",
+    "ui-leaflet-draw"
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "dist/leaflet-geoman.js",
+  "types": "dist/leaflet-geoman.d.ts",
+  "dependencies": {
+    "@jaames/iro": "^5.5.2",
+    "@turf/boolean-contains": "^7.2.0",
+    "@turf/kinks": "^7.2.0",
+    "@turf/line-intersect": "^7.2.0",
+    "@turf/line-split": "^7.2.0",
+    "lodash": "4.17.21",
+    "polyclip-ts": "^0.16.8",
+    "quill": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.21",
+    "cross-env": "^10.1.0",
+    "cypress": "^15.5.0",
+    "esbuild": "^0.25.11",
+    "eslint": "9.38.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-cypress": "5.2.0",
+    "eslint-plugin-import": "2.32.0",
+    "husky": "^9.1.7",
+    "leaflet": "1.9.4",
+    "lint-staged": "^16.2.6",
+    "prettier": "3.6.2",
+    "prosthetic-hand": "1.3.1",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "leaflet": "^1.2.0"
+  },
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "cross-env DEV=true node bundle.mjs",
+    "build": "node bundle.mjs",
+    "test": "cypress run --browser chrome",
+    "cypress": "cypress open",
+    "prepare": "npm run build && husky",
+    "eslint-check": "eslint --print-config . | eslint-config-prettier-check",
+    "eslint": "eslint \"{src,demo}/**/*.js\" --fix ",
+    "prettier": "prettier --write \"{src,demo}/**/*.{js,css}\" --log-level=warn",
+    "lint": "npm run eslint && npm run prettier"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mr-wolf-gb/leaflet-geoman-extended.git"
+  },
+  "author": {
+    "name": "mr-wolf-gb"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mr-wolf-gb/leaflet-geoman-extended/issues"
+  },
+  "homepage": "https://github.com/mr-wolf-gb/leaflet-geoman-extended",
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": true
+  },
+  "lint-staged": {
+    "*.js": "eslint \"{src,demo}/**/*.js\" --fix",
+    "*.{js,css,md}": "prettier --write \"{src,demo}/**/*.{js,css}\""
+  }
+}

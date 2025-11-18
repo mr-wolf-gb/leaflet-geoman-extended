@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Freehand Complete Demo - Line & Polygon Actions</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+    .demo-panel {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-width: 380px;
+    }
+    .demo-panel h2 {
+      margin: 0 0 15px 0;
+      font-size: 20px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .steps {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+    }
+    .steps h3 {
+      font-size: 14px;
+      margin: 0 0 10px 0;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .steps ol {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .steps li {
+      margin: 8px 0;
+      line-height: 1.6;
+      color: #444;
+    }
+    .steps strong {
+      color: #2196F3;
+    }
+    .visual-example {
+      background: #fff;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .toolbar-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin: 10px 0;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    .btn-visual {
+      padding: 8px 12px;
+      background: #666;
+      color: white;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    .btn-visual.icon {
+      background: #3388ff;
+      font-size: 16px;
+    }
+    .arrow {
+      font-size: 20px;
+      color: #999;
+    }
+    .status-box {
+      padding: 12px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    .event-log {
+      background: #f5f5f5;
+      border-radius: 4px;
+      padding: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+    .event-log div {
+      padding: 4px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .event-log div:last-child {
+      border-bottom: none;
+    }
+    .event-log .event-create {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .event-log .event-start {
+      color: #2196F3;
+    }
+    .event-log .event-end {
+      color: #FF9800;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="demo-panel">
+    <h2>🎨 Freehand Drawing Demo</h2>
+    
+    <div class="visual-example">
+      <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Toolbar Actions:</div>
+      <div class="toolbar-visual">
+        <span class="btn-visual icon">✏️</span>
+        <span class="arrow">→</span>
+        <span class="btn-visual">Line</span>
+        <span class="btn-visual">Polygon</span>
+        <span class="btn-visual">Cancel</span>
+      </div>
+    </div>
+
+    <div class="steps">
+      <h3>How to Use</h3>
+      <ol>
+        <li>Click the <strong>Freehand button</strong> (✏️) in the toolbar</li>
+        <li>Choose <strong>Line</strong> or <strong>Polygon</strong> mode</li>
+        <li><strong>Click and drag</strong> on the map to draw</li>
+        <li>Release to finish the shape</li>
+      </ol>
+    </div>
+
+    <div class="status-box" id="status">
+      👆 Click the Freehand button to start
+    </div>
+
+    <div style="font-size: 12px; color: #666; margin-bottom: 5px; font-weight: 500;">Event Log:</div>
+    <div class="event-log" id="eventLog">
+      <div style="color: #999;">Waiting for events...</div>
+    </div>
+  </div>
+  
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="../dist/leaflet-geoman.js"></script>
+  <script>
+    // Initialize the map
+    const map = L.map('map').setView([51.505, -0.09], 13);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add Leaflet-Geoman controls
+    map.pm.addControls({
+      position: 'topleft',
+      drawFreehand: true,
+      editMode: true,
+      removalMode: true,
+    });
+
+    // UI Elements
+    const status = document.getElementById('status');
+    const eventLog = document.getElementById('eventLog');
+    let eventCount = 0;
+
+    function addEvent(message, className = '') {
+      eventCount++;
+      if (eventCount === 1) {
+        eventLog.innerHTML = '';
+      }
+      const div = document.createElement('div');
+      div.className = className;
+      div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+      eventLog.insertBefore(div, eventLog.firstChild);
+      
+      // Keep only last 10 events
+      while (eventLog.children.length > 10) {
+        eventLog.removeChild(eventLog.lastChild);
+      }
+    }
+
+    // Event Listeners
+    map.on('pm:drawstart', (e) => {
+      const mode = map.pm.Draw.Freehand._fillMode ? 'Polygon' : 'Line';
+      status.textContent = `✍️ ${mode} mode active - Click and drag to draw`;
+      status.style.background = map.pm.Draw.Freehand._fillMode ? '#ffebee' : '#e3f2fd';
+      status.style.borderLeft = map.pm.Draw.Freehand._fillMode ? '4px solid #f44336' : '4px solid #2196F3';
+      addEvent(`Drawing started: ${mode} mode`, 'event-start');
+    });
+
+    map.on('pm:create', (e) => {
+      const shapeType = e.layer instanceof L.Polygon ? 'Polygon' : 'Polyline';
+      const pointCount = e.layer.getLatLngs().length;
+      status.textContent = `✅ ${shapeType} created with ${pointCount} points!`;
+      addEvent(`Created ${shapeType} (${pointCount} points)`, 'event-create');
+      
+      setTimeout(() => {
+        status.textContent = '👆 Click Line or Polygon to draw again';
+        status.style.background = '#e3f2fd';
+        status.style.borderLeft = '4px solid #2196F3';
+      }, 2500);
+    });
+
+    map.on('pm:drawend', (e) => {
+      addEvent('Drawing ended', 'event-end');
+    });
+
+    map.on('pm:globaldrawmodetoggled', (e) => {
+      if (!e.enabled) {
+        status.textContent = '👆 Click the Freehand button to start';
+        status.style.background = '#e3f2fd';
+        status.style.borderLeft = '4px solid #2196F3';
+        addEvent('Drawing mode disabled');
+      }
+    });
+
+    // Log when actions are clicked
+    console.log('Freehand Demo Ready!');
+    console.log('Click the Freehand button, then choose Line or Polygon');
+  </script>
+</body>
+</html>

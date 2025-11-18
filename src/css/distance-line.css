@@ -1,0 +1,208 @@
+/* Distance Line Modal Styles */
+.geoman-distance-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.geoman-distance-modal {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.geoman-distance-modal-header {
+  padding: 5px 5px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.geoman-distance-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.geoman-distance-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.geoman-distance-modal-close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.geoman-distance-modal-body {
+  padding: 8px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.geoman-distance-modal-body p {
+  margin: 0 0 10px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.geoman-distance-input-group {
+  display: flex;
+  gap: 10px;
+  margin: 5px 0;
+}
+
+.geoman-distance-input-group input {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.geoman-distance-input-group input:focus {
+  outline: none;
+  border-color: #3388ff;
+  box-shadow: 0 0 0 2px rgba(51, 136, 255, 0.1);
+}
+
+.geoman-distance-input-group select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  min-width: 80px;
+}
+
+.geoman-distance-input-group select:focus {
+  outline: none;
+  border-color: #3388ff;
+  box-shadow: 0 0 0 2px rgba(51, 136, 255, 0.1);
+}
+
+.geoman-distance-modal-hint {
+  font-size: 12px !important;
+  color: #888 !important;
+  font-style: italic;
+  margin-top: 8px !important;
+}
+
+.geoman-distance-modal-footer {
+  padding: 5px 5px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.geoman-distance-modal-footer button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.geoman-distance-modal-cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.geoman-distance-modal-cancel:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.geoman-distance-modal-start {
+  background: #3388ff;
+  color: white;
+}
+
+.geoman-distance-modal-start:hover {
+  background: #2277ee;
+}
+
+/* Distance Label Styles */
+.geoman-distance-label {
+  background: transparent;
+  border: none;
+  position: absolute;
+}
+
+.geoman-distance-label-content {
+  position: relative;
+  background: white;
+  color: black;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 2px;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  opacity: 1;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+/* Black pointer triangle (outer) */
+.geoman-distance-label-content::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid black;
+  z-index: 0;
+}
+
+/* White pointer triangle (inner) */
+.geoman-distance-label-content::before {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid white;
+  z-index: 1;
+}

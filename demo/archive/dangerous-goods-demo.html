@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dangerous Goods Zones Demo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="./dist/leaflet-geoman.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+        .info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div class="info">
+        <h3>Dangerous Goods Zones Demo</h3>
+        <p>Click the dangerous goods zones button in the toolbar to:</p>
+        <ol>
+            <li>Configure zone distances in the modal</li>
+            <li>Click on the map to place the zones</li>
+            <li>Move all zones together by dragging</li>
+        </ol>
+        <p><strong>Default zones:</strong></p>
+        <ul>
+            <li>Red: 30m</li>
+            <li>Orange: 60m</li>
+            <li>Yellow: 300m</li>
+            <li>Green: 1000m</li>
+        </ul>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="./dist/leaflet-geoman.min.js"></script>
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([51.505, -0.09], 13);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add Leaflet-Geoman controls
+        map.pm.addControls({
+            position: 'topleft',
+            drawDangerousGoodsZones: true,
+            drawMarker: true,
+            drawCircle: true,
+            drawPolygon: true,
+            drawPolyline: true,
+            drawRectangle: true,
+            editMode: true,
+            dragMode: true,
+            cutPolygon: true,
+            removalMode: true,
+        });
+
+        // Listen for dangerous goods zones creation
+        map.on('pm:create', function(e) {
+            if (e.layer._dangerousGoodsZones) {
+                console.log('Dangerous goods zones created:', e.layer);
+                
+                // Enable editing for the zones
+                e.layer.pm.enable();
+                
+                // Add event listeners for the zones
+                e.layer.on('pm:edit', function(editEvent) {
+                    console.log('Dangerous goods zones edited:', editEvent);
+                });
+            }
+        });
+
+        // Add some sample data
+        const sampleMarker = L.marker([51.5, -0.09]).addTo(map);
+        sampleMarker.bindPopup('Sample location for dangerous goods zones');
+    </script>
+</body>
+</html>

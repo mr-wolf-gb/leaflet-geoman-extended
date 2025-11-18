@@ -1,0 +1,474 @@
+/* RTL (Right-to-Left) styles for Arabic language support */
+/* NOTE: Modal RTL styles are now in modals.css */
+
+/* Apply RTL direction when Arabic is active */
+[dir='rtl'] .leaflet-pm-toolbar,
+[dir='rtl'] .leaflet-pm-actions-container,
+[dir='rtl'] .leaflet-control-pm,
+[dir='rtl'] .leaflet-pm-context-menu {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Toolbar positioning for RTL */
+/* Keep positions literal - don't reverse them */
+/* topleft = top-left, bottomright = bottom-right, etc. */
+/* This ensures consistent positioning regardless of RTL mode */
+
+/* Only adjust control margins for proper spacing */
+[dir='rtl'] .leaflet-left .leaflet-control {
+  margin-left: 10px;
+  margin-right: 0;
+}
+
+[dir='rtl'] .leaflet-right .leaflet-control {
+  margin-right: 10px;
+  margin-left: 0;
+}
+
+/* Context menu RTL positioning */
+[dir='rtl'] .leaflet-pm-context-menu {
+  text-align: right;
+}
+
+[dir='rtl'] .leaflet-pm-context-menu-item {
+  text-align: right;
+  padding: 8px 12px 8px 8px;
+}
+
+/* Measurements tooltip RTL */
+[dir='rtl'] .leaflet-tooltip-pane .leaflet-tooltip {
+  direction: rtl;
+  text-align: right;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  min-width: 150px;
+}
+
+[dir='rtl'] .leaflet-pm-measurement {
+  text-align: right;
+  direction: rtl;
+}
+
+/* Reset margins for measurement tooltips to prevent offset */
+[dir='rtl'] .leaflet-tooltip-pane .leaflet-tooltip-left {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+[dir='rtl'] .leaflet-tooltip-pane .leaflet-tooltip-right {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+[dir='rtl'] .leaflet-tooltip-pane .leaflet-tooltip-top {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+[dir='rtl'] .leaflet-tooltip-pane .leaflet-tooltip-bottom {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+/* Ensure proper spacing between label and value in measurements */
+[dir='rtl'] .leaflet-tooltip::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+/* Actions container RTL */
+/* Don't set display here - it breaks visibility control */
+[dir='rtl'] .leaflet-pm-actions-container {
+  flex-direction: row-reverse;
+  gap: 0; /* Remove any gap */
+}
+
+[dir='rtl'] .leaflet-pm-action {
+  margin-left: 0;
+  margin-right: 0;
+  flex-shrink: 0;
+}
+
+[dir='rtl'] .leaflet-pm-action:first-child {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+[dir='rtl'] .leaflet-pm-action:last-child {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Ensure action buttons are tightly packed like in LTR */
+[dir='rtl'] .leaflet-pm-action a {
+  margin: 0;
+  display: block;
+}
+
+/* Remove any extra spacing between action buttons */
+/* Only apply flex when the container is active (visible) */
+[dir='rtl'] .button-container.active .leaflet-pm-actions-container {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 0;
+}
+
+[dir='rtl'] .button-container .leaflet-pm-actions-container .leaflet-pm-action {
+  margin: 0;
+  border-left: 1px solid #555;
+  border-right: 0;
+}
+
+/* First action button in RTL (rightmost) */
+[dir='rtl']
+  .button-container
+  .leaflet-pm-actions-container
+  .leaflet-pm-action:first-child {
+  border-radius: 0 3px 3px 0;
+  border-right: 0;
+  border-left: 1px solid #555;
+}
+
+/* Last action button in RTL (leftmost) */
+[dir='rtl']
+  .button-container
+  .leaflet-pm-actions-container
+  .leaflet-pm-action:last-child {
+  border-radius: 3px 0 0 3px;
+  border-left: 0;
+  border-right: 1px solid #555;
+}
+
+/* For pos-right actions container */
+[dir='rtl']
+  .button-container
+  .leaflet-pm-actions-container.pos-right
+  .leaflet-pm-action:first-child {
+  border-radius: 3px 0 0 3px;
+  border-left: 0;
+}
+
+[dir='rtl']
+  .button-container
+  .leaflet-pm-actions-container.pos-right
+  .leaflet-pm-action:last-child {
+  border-radius: 0 3px 3px 0;
+  border-left: 1px solid #555;
+}
+
+/* Actions container positioning based on toolbar position */
+/* Positions are literal now - left means left, right means right */
+
+/* When toolbar is on the left */
+[dir='rtl'] .leaflet-top.leaflet-left .leaflet-pm-actions-container {
+  left: 34px; /* Actions appear to the right of toolbar */
+  right: auto;
+}
+
+[dir='rtl'] .leaflet-bottom.leaflet-left .leaflet-pm-actions-container {
+  left: 34px;
+  right: auto;
+}
+
+/* When toolbar is on the right */
+[dir='rtl'] .leaflet-top.leaflet-right .leaflet-pm-actions-container {
+  right: 34px; /* Actions appear to the left of toolbar */
+  left: auto;
+}
+
+[dir='rtl'] .leaflet-bottom.leaflet-right .leaflet-pm-actions-container {
+  right: 34px;
+  left: auto;
+}
+
+/* Adjust for different toolbar widths */
+[dir='rtl'] .leaflet-pm-actions-container {
+  direction: rtl;
+  text-align: right;
+}
+
+/* IMPORTANT: Don't override the display property - let JavaScript control visibility */
+/* The actions container should be hidden by default and only shown when button is active */
+[dir='rtl'] .button-container .leaflet-pm-actions-container {
+  /* Don't set display here - it's controlled by .active class */
+}
+
+/* Additional positioning for actions container */
+[dir='rtl'] .leaflet-control-container .leaflet-pm-actions-container {
+  position: absolute;
+}
+
+/* Fine-tune positioning based on control position */
+/* Literal positions - no reversal */
+
+[dir='rtl']
+  .leaflet-control-container
+  .leaflet-top.leaflet-left
+  .leaflet-pm-actions-container {
+  top: 0;
+  left: 30px;
+  right: auto;
+}
+
+[dir='rtl']
+  .leaflet-control-container
+  .leaflet-top.leaflet-right
+  .leaflet-pm-actions-container {
+  top: 0;
+  right: 30px;
+  left: auto;
+}
+
+[dir='rtl']
+  .leaflet-control-container
+  .leaflet-bottom.leaflet-left
+  .leaflet-pm-actions-container {
+  bottom: 0;
+  left: 30px;
+  right: auto;
+}
+
+[dir='rtl']
+  .leaflet-control-container
+  .leaflet-bottom.leaflet-right
+  .leaflet-pm-actions-container {
+  bottom: 0;
+  right: 30px;
+  left: auto;
+}
+
+/* Tooltips RTL */
+[dir='rtl'] .leaflet-tooltip {
+  text-align: right;
+  direction: rtl;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+/* Fix tooltip positioning - prevent offset issues */
+[dir='rtl'] .leaflet-tooltip-left {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+[dir='rtl'] .leaflet-tooltip-right {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+[dir='rtl'] .leaflet-tooltip-top {
+  margin-top: 0;
+}
+
+[dir='rtl'] .leaflet-tooltip-bottom {
+  margin-bottom: 0;
+}
+
+/* Tooltip arrow positioning for RTL */
+[dir='rtl'] .leaflet-tooltip-left:before {
+  right: 0;
+  left: auto;
+  margin-right: -12px;
+  margin-left: 0;
+}
+
+[dir='rtl'] .leaflet-tooltip-right:before {
+  left: 0;
+  right: auto;
+  margin-left: -12px;
+  margin-right: 0;
+}
+
+/* Ensure measurement values align properly */
+[dir='rtl'] .leaflet-tooltip br {
+  display: block;
+  content: '';
+  margin: 2px 0;
+}
+
+/* Fix hint marker tooltip positioning */
+[dir='rtl'] .leaflet-tooltip.leaflet-tooltip-bottom {
+  margin-top: 6px;
+}
+
+[dir='rtl'] .leaflet-tooltip.leaflet-tooltip-top {
+  margin-bottom: 6px;
+}
+
+/* Cursor marker tooltip - ensure it follows cursor */
+[dir='rtl'] .cursor-marker + .leaflet-tooltip {
+  margin: 0 !important;
+}
+
+/* Permanent tooltips (like hints) should not have extra margins */
+[dir='rtl'] .leaflet-tooltip-permanent {
+  margin: 0 !important;
+}
+
+/* Ensure tooltip pane doesn't interfere with positioning */
+[dir='rtl'] .leaflet-tooltip-pane {
+  direction: ltr; /* Keep pane in LTR to prevent positioning issues */
+}
+
+/* But tooltip content should still be RTL */
+[dir='rtl'] .leaflet-tooltip-pane .leaflet-tooltip {
+  direction: rtl;
+}
+
+/* Fix offset for tooltips attached to markers */
+[dir='rtl'] .leaflet-marker-pane + .leaflet-tooltip-pane .leaflet-tooltip {
+  transform: none;
+}
+
+/* Override Leaflet's default tooltip offset in RTL */
+[dir='rtl'] .leaflet-tooltip {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Specific positioning for bottom tooltips (most common for hints) */
+[dir='rtl'] .leaflet-tooltip-bottom {
+  margin-top: 6px !important;
+  margin-bottom: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Specific positioning for top tooltips */
+[dir='rtl'] .leaflet-tooltip-top {
+  margin-bottom: 6px !important;
+  margin-top: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Ensure tooltip arrow doesn't cause offset */
+[dir='rtl'] .leaflet-tooltip-bottom:before {
+  left: 50%;
+  margin-left: -6px;
+  margin-right: 0;
+}
+
+[dir='rtl'] .leaflet-tooltip-top:before {
+  left: 50%;
+  margin-left: -6px;
+  margin-right: 0;
+}
+
+/* CRITICAL FIX: Counter the translate3d offset in RTL
+   Leaflet calculates tooltip position but doesn't account for RTL
+   We need to ensure the tooltip appears at the cursor position */
+[dir='rtl'] .leaflet-tooltip-pane {
+  /* Keep the pane itself in LTR to prevent coordinate issues */
+  direction: ltr !important;
+}
+
+/* But ensure tooltip content is RTL */
+[dir='rtl'] .leaflet-tooltip-pane .leaflet-tooltip {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+/* Fix for permanent tooltips (hints) - ensure they follow cursor exactly */
+[dir='rtl'] .leaflet-tooltip-permanent {
+  /* Remove any transform that might cause offset */
+  transform: translate3d(0, 0, 0) !important;
+}
+
+/* Toolbar buttons RTL */
+[dir='rtl'] .leaflet-pm-icon {
+  transform: scaleX(-1); /* Flip icons for RTL */
+}
+
+/* Don't flip certain icons that should remain the same */
+[dir='rtl'] .leaflet-pm-icon-marker,
+[dir='rtl'] .leaflet-pm-icon-circle,
+[dir='rtl'] .leaflet-pm-icon-circle-marker,
+[dir='rtl'] .leaflet-pm-icon-rectangle {
+  transform: none;
+}
+
+/* Toolbar button container RTL */
+[dir='rtl'] .leaflet-pm-toolbar .leaflet-pm-icon-container {
+  direction: rtl;
+}
+
+/* Ensure toolbar buttons stack correctly in RTL */
+[dir='rtl'] .leaflet-bar {
+  direction: rtl;
+}
+
+[dir='rtl'] .leaflet-bar a {
+  direction: ltr; /* Keep button content LTR for icons */
+}
+
+/* Distance labels RTL */
+[dir='rtl'] .geoman-distance-label-content {
+  direction: ltr; /* Keep distance numbers LTR */
+  text-align: center;
+}
+
+/* Dangerous goods zone labels RTL */
+[dir='rtl'] .dangerous-goods-zone-label {
+  direction: ltr; /* Keep distance numbers LTR */
+}
+
+/* Additional RTL improvements */
+
+/* Ensure proper text wrapping in RTL */
+[dir='rtl'] .leaflet-pm-toolbar,
+[dir='rtl'] .pm-text-modal,
+[dir='rtl'] .pm-style-modal {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Modal overlay RTL */
+[dir='rtl'] .pm-text-modal-overlay,
+[dir='rtl'] .pm-style-modal-overlay,
+[dir='rtl'] .geoman-distance-modal-overlay,
+[dir='rtl'] .leaflet-pm-modal-overlay {
+  direction: rtl;
+}
+
+/* Ensure modal is centered properly */
+[dir='rtl'] .pm-text-modal,
+[dir='rtl'] .pm-style-modal,
+[dir='rtl'] .geoman-distance-modal {
+  margin: auto;
+}
+
+/* Input groups RTL */
+[dir='rtl'] .pm-text-modal-field input[type='color'],
+[dir='rtl'] .pm-text-modal-field input[type='number'] {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* Ensure proper alignment for all modal headers */
+[dir='rtl'] .pm-text-modal-header,
+[dir='rtl'] .pm-style-modal-header,
+[dir='rtl'] .geoman-distance-modal-header {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: space-between;
+  text-align: right;
+}
+
+/* Modal title alignment */
+[dir='rtl'] .pm-text-modal-title,
+[dir='rtl'] .pm-style-modal-title,
+[dir='rtl'] .geoman-distance-modal-header h3 {
+  text-align: right;
+  margin: 0;
+  flex: 1;
+}
+
+[dir='rtl'] .IroSlider {
+  margin-left: 0;
+  margin-right: 12px;
+}

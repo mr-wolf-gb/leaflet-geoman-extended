@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTL API Examples - Leaflet-Geoman</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+    <link rel="stylesheet" href="../src/css/rtl.css" />
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+        
+        .control-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 350px;
+        }
+        
+        .control-panel h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .control-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        button {
+            padding: 8px 15px;
+            margin: 5px 5px 5px 0;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+        }
+        
+        button.active {
+            background: #007cff;
+            color: white;
+            border-color: #007cff;
+        }
+        
+        .status {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .status strong {
+            color: #007cff;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="control-panel">
+        <h3>🌍 RTL API Examples</h3>
+        
+        <!-- Method 1: Auto-detect -->
+        <div class="control-group">
+            <label>Method 1: Auto-detect RTL from language</label>
+            <button onclick="method1('ar')" id="m1-ar">Arabic (RTL)</button>
+            <button onclick="method1('en')" id="m1-en">English (LTR)</button>
+            <button onclick="method1('fa')" id="m1-fa">Persian (RTL)</button>
+            <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                <code>map.pm.setLang(lang)</code>
+            </div>
+        </div>
+        
+        <!-- Method 2: Explicit RTL -->
+        <div class="control-group">
+            <label>Method 2: Explicit RTL control</label>
+            <button onclick="method2('en', true)">English + RTL</button>
+            <button onclick="method2('ar', false)">Arabic + LTR</button>
+            <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                <code>map.pm.setLang(lang, null, 'en', { rtl: true })</code>
+            </div>
+        </div>
+        
+        <!-- Method 3: Independent RTL -->
+        <div class="control-group">
+            <label>Method 3: Independent RTL control</label>
+            <button onclick="method3(true)">Enable RTL</button>
+            <button onclick="method3(false)">Disable RTL</button>
+            <button onclick="toggleRTL()">Toggle RTL</button>
+            <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                <code>map.pm.setRTL(enabled)</code>
+            </div>
+        </div>
+        
+        <!-- Status -->
+        <div class="status">
+            <div><strong>Language:</strong> <span id="status-lang">en</span></div>
+            <div><strong>RTL Mode:</strong> <span id="status-rtl">false</span></div>
+            <div><strong>L.PM.isRTL:</strong> <span id="status-global">false</span></div>
+        </div>
+    </div>
+    
+    <div id="map"></div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../dist/leaflet-geoman.js"></script>
+    
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([51.505, -0.09], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Add Leaflet-Geoman controls
+        map.pm.addControls({
+            position: 'topleft',
+            drawMarker: true,
+            drawPolyline: true,
+            drawPolygon: true,
+            drawCircle: true,
+            editMode: true,
+            dragMode: true,
+            removalMode: true,
+        });
+        
+        // Enable measurements
+        map.pm.setGlobalOptions({
+            measurements: {
+                measurement: true,
+                displayFormat: 'metric',
+            }
+        });
+        
+        // Listen to language/RTL changes
+        map.on('pm:langchange', (e) => {
+            console.log('Language changed:', e);
+            updateStatus();
+        });
+        
+        // Method 1: Auto-detect RTL from language
+        function method1(lang) {
+            console.log(`Method 1: Setting language to ${lang} (auto-detect RTL)`);
+            map.pm.setLang(lang);
+            
+            // Update button states
+            document.querySelectorAll('[id^="m1-"]').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('m1-' + lang).classList.add('active');
+        }
+        
+        // Method 2: Explicit RTL control
+        function method2(lang, rtl) {
+            console.log(`Method 2: Setting language to ${lang} with explicit RTL=${rtl}`);
+            map.pm.setLang(lang, null, 'en', { rtl: rtl });
+        }
+        
+        // Method 3: Independent RTL control
+        function method3(enabled) {
+            console.log(`Method 3: Setting RTL to ${enabled}`);
+            map.pm.setRTL(enabled);
+        }
+        
+        // Toggle RTL
+        function toggleRTL() {
+            const current = map.pm.getRTL();
+            console.log(`Toggling RTL from ${current} to ${!current}`);
+            map.pm.setRTL(!current);
+        }
+        
+        // Update status display
+        function updateStatus() {
+            document.getElementById('status-lang').textContent = L.PM.activeLang;
+            document.getElementById('status-rtl').textContent = map.pm.getRTL();
+            document.getElementById('status-global').textContent = L.PM.isRTL;
+            
+            // Update document direction
+            document.documentElement.setAttribute('dir', map.pm.getRTL() ? 'rtl' : 'ltr');
+        }
+        
+        // Initial status
+        updateStatus();
+        document.getElementById('m1-en').classList.add('active');
+        
+        // Log API methods for testing
+        console.log('Available API methods:');
+        console.log('- map.pm.setLang(lang, override, fallback, options)');
+        console.log('- map.pm.setRTL(enabled)');
+        console.log('- map.pm.getRTL()');
+        console.log('- L.PM.isRTL (global property)');
+    </script>
+</body>
+</html>

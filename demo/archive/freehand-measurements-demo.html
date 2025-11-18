@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Freehand with Measurements Demo</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+    .control-panel {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-width: 400px;
+    }
+    .control-panel h2 {
+      margin: 0 0 15px 0;
+      font-size: 20px;
+      color: #333;
+    }
+    .mode-section {
+      margin-bottom: 20px;
+    }
+    .mode-section h3 {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .btn:hover {
+      border-color: #999;
+      background: #f5f5f5;
+    }
+    .btn.active {
+      background: #2196F3;
+      color: white;
+      border-color: #2196F3;
+    }
+    .btn.polygon.active {
+      background: #FF5722;
+      border-color: #FF5722;
+    }
+    .format-toggle {
+      display: flex;
+      gap: 10px;
+    }
+    .format-btn {
+      flex: 1;
+      padding: 8px;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .format-btn.active {
+      background: #4CAF50;
+      color: white;
+      border-color: #4CAF50;
+    }
+    .info-box {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #2196F3;
+      margin-bottom: 15px;
+    }
+    .info-box h4 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #1976D2;
+    }
+    .info-box ul {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .status {
+      padding: 12px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      font-size: 14px;
+      text-align: center;
+      font-weight: 500;
+    }
+    /* Measurement tooltip styling */
+    .leaflet-tooltip.geoman-measurement-tooltip {
+      background: rgba(0, 0, 0, 0.9) !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 4px !important;
+      padding: 8px 12px !important;
+      font-size: 13px !important;
+      line-height: 1.6 !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+      opacity: 1 !important;
+    }
+    .leaflet-tooltip.geoman-measurement-tooltip::before {
+      border-top-color: rgba(0, 0, 0, 0.9) !important;
+    }
+    .leaflet-geoman-measurement-marker {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="control-panel">
+    <h2>📏 Freehand with Measurements</h2>
+    
+    <div class="mode-section">
+      <h3>Drawing Mode</h3>
+      <div class="button-group">
+        <button class="btn line" id="lineBtn">
+          📏 Line<br>
+          <small style="font-size: 11px; opacity: 0.8;">Shows Length</small>
+        </button>
+        <button class="btn polygon" id="polygonBtn">
+          📐 Polygon<br>
+          <small style="font-size: 11px; opacity: 0.8;">Shows Area</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="mode-section">
+      <h3>Measurement Format</h3>
+      <div class="format-toggle">
+        <button class="format-btn active" id="metricBtn">Metric (m, km²)</button>
+        <button class="format-btn" id="imperialBtn">Imperial (ft, mi²)</button>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <h4>💡 How it works</h4>
+      <ul>
+        <li>Choose Line or Polygon mode</li>
+        <li>Click and drag to draw</li>
+        <li>See measurements in real-time</li>
+        <li>Hover over shapes to see measurements</li>
+      </ul>
+    </div>
+
+    <div class="status" id="status">
+      Click Line or Polygon to start
+    </div>
+  </div>
+  
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="../dist/leaflet-geoman.js"></script>
+  <script>
+    // Initialize the map
+    const map = L.map('map').setView([51.505, -0.09], 13);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add Leaflet-Geoman controls
+    map.pm.addControls({
+      position: 'topleft',
+      drawFreehand: true,
+      editMode: true,
+      removalMode: true,
+    });
+
+    // UI Elements
+    const lineBtn = document.getElementById('lineBtn');
+    const polygonBtn = document.getElementById('polygonBtn');
+    const metricBtn = document.getElementById('metricBtn');
+    const imperialBtn = document.getElementById('imperialBtn');
+    const status = document.getElementById('status');
+
+    let currentFormat = 'metric';
+
+    // Line Mode with Measurements
+    lineBtn.addEventListener('click', () => {
+      map.pm.enableDraw('Freehand', {
+        freehandOptions: { fill: false },
+        pathOptions: {
+          color: '#2196F3',
+          weight: 4,
+        },
+        measurements: {
+          measurement: true,
+          displayFormat: currentFormat,
+          showTooltip: true,
+          showTooltipOnHover: true,
+          totalLength: true,
+        },
+      });
+      
+      lineBtn.classList.add('active');
+      polygonBtn.classList.remove('active');
+      status.textContent = '📏 Line mode - Draw to see length measurements';
+      status.style.background = '#e3f2fd';
+    });
+
+    // Polygon Mode with Measurements
+    polygonBtn.addEventListener('click', () => {
+      map.pm.enableDraw('Freehand', {
+        freehandOptions: { fill: true },
+        pathOptions: {
+          color: '#FF5722',
+          fillColor: '#FF9800',
+          fillOpacity: 0.4,
+          weight: 3,
+        },
+        measurements: {
+          measurement: true,
+          displayFormat: currentFormat,
+          showTooltip: true,
+          showTooltipOnHover: true,
+          area: true,
+          perimeter: true,
+        },
+      });
+      
+      polygonBtn.classList.add('active');
+      lineBtn.classList.remove('active');
+      status.textContent = '📐 Polygon mode - Draw to see area measurements';
+      status.style.background = '#ffebee';
+    });
+
+    // Metric Format
+    metricBtn.addEventListener('click', () => {
+      currentFormat = 'metric';
+      metricBtn.classList.add('active');
+      imperialBtn.classList.remove('active');
+      
+      // Restart current mode with new format
+      if (lineBtn.classList.contains('active')) {
+        lineBtn.click();
+      } else if (polygonBtn.classList.contains('active')) {
+        polygonBtn.click();
+      }
+    });
+
+    // Imperial Format
+    imperialBtn.addEventListener('click', () => {
+      currentFormat = 'imperial';
+      imperialBtn.classList.add('active');
+      metricBtn.classList.remove('active');
+      
+      // Restart current mode with new format
+      if (lineBtn.classList.contains('active')) {
+        lineBtn.click();
+      } else if (polygonBtn.classList.contains('active')) {
+        polygonBtn.click();
+      }
+    });
+
+    // Event Listeners
+    map.on('pm:drawstart', (e) => {
+      console.log('Drawing started:', e.shape);
+    });
+
+    map.on('pm:create', (e) => {
+      console.log('Shape created:', e);
+      console.log('Measurements:', e.layer.pm.measurements);
+      
+      const shapeType = e.layer instanceof L.Polygon ? 'Polygon' : 'Line';
+      status.textContent = `✅ ${shapeType} created! Hover to see measurements`;
+      
+      setTimeout(() => {
+        status.textContent = 'Click Line or Polygon to draw again';
+        status.style.background = '#f5f5f5';
+      }, 3000);
+    });
+
+    // Auto-start in line mode
+    setTimeout(() => {
+      lineBtn.click();
+    }, 500);
+  </script>
+</body>
+</html>

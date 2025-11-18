@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Dangerous Goods Zones Demo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="./dist/leaflet-geoman.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-width: 350px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .control-group input, .control-group select {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .zone-config {
+            display: grid;
+            grid-template-columns: 1fr 80px;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .color-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .btn {
+            background: #007cff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn.secondary {
+            background: #6c757d;
+        }
+        .btn.secondary:hover {
+            background: #545b62;
+        }
+        .event-log {
+            max-height: 150px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div class="controls">
+        <h3>Dangerous Goods Zones Control</h3>
+        
+        <div class="control-group">
+            <label>Preset Configurations:</label>
+            <select id="presetSelect">
+                <option value="default">Default (30/60/300/1000m)</option>
+                <option value="chemical">Chemical Plant (50/100/500/2000m)</option>
+                <option value="nuclear">Nuclear Facility (100/300/1000/5000m)</option>
+                <option value="explosive">Explosive Storage (25/50/200/800m)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Custom Zone Distances:</label>
+            <div class="zone-config">
+                <div><span class="color-indicator" style="background: #ff0000;"></span>Red Zone (m):</div>
+                <input type="number" id="redZone" value="30" min="1">
+            </div>
+            <div class="zone-config">
+                <div><span class="color-indicator" style="background: #ff8800;"></span>Orange Zone (m):</div>
+                <input type="number" id="orangeZone" value="60" min="1">
+            </div>
+            <div class="zone-config">
+                <div><span class="color-indicator" style="background: #ffff00;"></span>Yellow Zone (m):</div>
+                <input type="number" id="yellowZone" value="300" min="1">
+            </div>
+            <div class="zone-config">
+                <div><span class="color-indicator" style="background: #00ff00;"></span>Green Zone (m):</div>
+                <input type="number" id="greenZone" value="1000" min="1">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <button class="btn" onclick="startDrawingZones()">Draw Zones</button>
+            <button class="btn secondary" onclick="clearAllZones()">Clear All</button>
+        </div>
+
+        <div class="control-group">
+            <label>
+                <input type="checkbox" id="snapToLayers" checked> Snap to existing layers
+            </label>
+            <label>
+                <input type="checkbox" id="showTooltips" checked> Show tooltips
+            </label>
+        </div>
+
+        <div class="control-group">
+            <label>Event Log:</label>
+            <div id="eventLog" class="event-log"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="./dist/leaflet-geoman.min.js"></script>
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([51.505, -0.09], 13);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add Leaflet-Geoman controls
+        map.pm.addControls({
+            position: 'topleft',
+            drawDangerousGoodsZones: true,
+            drawMarker: true,
+            drawCircle: true,
+            drawPolygon: true,
+            drawPolyline: true,
+            drawRectangle: true,
+            editMode: true,
+            dragMode: true,
+            cutPolygon: true,
+            removalMode: true,
+        });
+
+        // Store created zones for management
+        let dangerousGoodsZones = [];
+
+        // Preset configurations
+        const presets = {
+            default: [30, 60, 300, 1000],
+            chemical: [50, 100, 500, 2000],
+            nuclear: [100, 300, 1000, 5000],
+            explosive: [25, 50, 200, 800]
+        };
+
+        // Event logging
+        function logEvent(message) {
+            const log = document.getElementById('eventLog');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Update zone inputs based on preset
+        document.getElementById('presetSelect').addEventListener('change', function(e) {
+            const preset = presets[e.target.value];
+            if (preset) {
+                document.getElementById('redZone').value = preset[0];
+                document.getElementById('orangeZone').value = preset[1];
+                document.getElementById('yellowZone').value = preset[2];
+                document.getElementById('greenZone').value = preset[3];
+                logEvent(`Applied preset: ${e.target.value}`);
+            }
+        });
+
+        // Start drawing zones with custom configuration
+        function startDrawingZones() {
+            const customZones = [
+                { name: 'Roter Kreis', distance: parseInt(document.getElementById('redZone').value), color: '#ff0000', fillOpacity: 0.3 },
+                { name: 'Oranger Kreis', distance: parseInt(document.getElementById('orangeZone').value), color: '#ff8800', fillOpacity: 0.25 },
+                { name: 'Gelber Kreis', distance: parseInt(document.getElementById('yellowZone').value), color: '#ffff00', fillOpacity: 0.2 },
+                { name: 'Grüner Kreis', distance: parseInt(document.getElementById('greenZone').value), color: '#00ff00', fillOpacity: 0.15 }
+            ];
+
+            // Configure the drawing tool
+            map.pm.Draw.DangerousGoodsZones._zones = customZones;
+            
+            // Set options
+            const options = {
+                snappable: document.getElementById('snapToLayers').checked,
+                tooltips: document.getElementById('showTooltips').checked,
+                continueDrawing: false
+            };
+
+            // Start drawing
+            map.pm.Draw.DangerousGoodsZones.enable(options);
+            logEvent('Started drawing dangerous goods zones');
+        }
+
+        // Clear all dangerous goods zones
+        function clearAllZones() {
+            dangerousGoodsZones.forEach(zone => {
+                map.removeLayer(zone);
+            });
+            dangerousGoodsZones = [];
+            logEvent('Cleared all dangerous goods zones');
+        }
+
+        // Listen for dangerous goods zones creation
+        map.on('pm:create', function(e) {
+            if (e.layer._dangerousGoodsZones) {
+                dangerousGoodsZones.push(e.layer);
+                logEvent(`Created dangerous goods zones at ${e.layer.getLayers()[0].getLatLng().lat.toFixed(6)}, ${e.layer.getLayers()[0].getLatLng().lng.toFixed(6)}`);
+                
+                // Enable editing for the zones
+                e.layer.pm.enable();
+                
+                // Add event listeners for the zones
+                e.layer.on('pm:edit', function(editEvent) {
+                    logEvent('Dangerous goods zones moved/edited');
+                });
+
+                e.layer.on('pm:remove', function(removeEvent) {
+                    const index = dangerousGoodsZones.indexOf(removeEvent.layer);
+                    if (index > -1) {
+                        dangerousGoodsZones.splice(index, 1);
+                    }
+                    logEvent('Dangerous goods zones removed');
+                });
+            }
+        });
+
+        // Listen for drawing mode changes
+        map.on('pm:drawstart', function(e) {
+            if (e.shape === 'DangerousGoodsZones') {
+                logEvent('Dangerous goods zones drawing mode started');
+            }
+        });
+
+        map.on('pm:drawend', function(e) {
+            if (e.shape === 'DangerousGoodsZones') {
+                logEvent('Dangerous goods zones drawing mode ended');
+            }
+        });
+
+        // Add some sample data for snapping
+        const sampleMarker = L.marker([51.5, -0.09]).addTo(map);
+        sampleMarker.bindPopup('Sample location - zones will snap to this');
+
+        const sampleCircle = L.circle([51.51, -0.08], {radius: 200, color: 'blue', fillOpacity: 0.1}).addTo(map);
+        sampleCircle.bindPopup('Sample area');
+
+        // Initialize log
+        logEvent('Dangerous goods zones demo initialized');
+    </script>
+</body>
+</html>

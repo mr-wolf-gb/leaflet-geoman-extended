@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaflet-Geoman Measurement Demo</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Leaflet-Geoman CSS -->
+  <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+    
+    .info-panel {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: white;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+      max-width: 300px;
+    }
+    
+    .info-panel h3 {
+      margin-top: 0;
+      font-size: 16px;
+    }
+    
+    .info-panel label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: 500;
+    }
+    
+    .info-panel select,
+    .info-panel input {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    
+    .info-panel button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      background: #3388ff;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .info-panel button:hover {
+      background: #2277ee;
+    }
+    
+    .measurement-output {
+      margin-top: 15px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 3px;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .measurement-output pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  
+  <div class="info-panel">
+    <h3>🔧 Measurement Settings</h3>
+    
+    <label>
+      <input type="checkbox" id="enableMeasurements" checked> Enable Measurements
+    </label>
+    
+    <label>
+      <input type="checkbox" id="showTooltip" checked> Show Tooltip
+    </label>
+    
+    <label>
+      <input type="checkbox" id="showTooltipOnHover" checked> Show on Hover
+    </label>
+    
+    <label>Display Format:</label>
+    <select id="displayFormat">
+      <option value="metric">Metric (m, km, m², ha)</option>
+      <option value="imperial">Imperial (ft, mi, ft², acres)</option>
+    </select>
+    
+    <button id="applySettings">Apply Settings</button>
+    
+    <div class="measurement-output" id="output">
+      <pre>Draw or edit a shape to see measurements...</pre>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Leaflet-Geoman JS -->
+  <script src="../dist/leaflet-geoman.js"></script>
+  
+  <script>
+    // Initialize map
+    const map = L.map('map').setView([51.505, -0.09], 13);
+    
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Enable measurements by default
+    map.pm.setGlobalOptions({
+      measurements: {
+        measurement: true,
+        displayFormat: 'metric',
+        showTooltip: true,
+        showTooltipOnHover: true,
+        totalLength: true,
+        segmentLength: true,
+        area: true,
+        radius: true,
+        perimeter: true,
+        height: true,
+        width: true,
+        coordinates: true,
+      }
+    });
+    
+    // Add Leaflet-Geoman controls
+    map.pm.addControls({
+      position: 'topleft',
+      drawMarker: true,
+      drawCircleMarker: true,
+      drawPolyline: true,
+      drawRectangle: true,
+      drawPolygon: true,
+      drawCircle: true,
+      editMode: true,
+      dragMode: true,
+      cutPolygon: true,
+      removalMode: true,
+    });
+    
+    // Update output when layer is created
+    map.on('pm:create', (e) => {
+      const layer = e.layer;
+      const measurements = layer.pm.measurements;
+      
+      updateOutput('Layer Created', measurements);
+      
+      // Add click listener to show measurements
+      layer.on('click', () => {
+        const currentMeasurements = L.PM.Utils.getMeasurements(
+          layer, 
+          map, 
+          document.getElementById('displayFormat').value
+        );
+        updateOutput('Layer Clicked', currentMeasurements);
+      });
+    });
+    
+    // Update output when layer is edited
+    map.on('pm:edit', (e) => {
+      const layer = e.layer;
+      const measurements = L.PM.Utils.getMeasurements(
+        layer, 
+        map, 
+        document.getElementById('displayFormat').value
+      );
+      layer.pm.measurements = measurements;
+      
+      updateOutput('Layer Edited', measurements);
+    });
+    
+    // Function to update output panel
+    function updateOutput(action, measurements) {
+      const output = document.getElementById('output');
+      const timestamp = new Date().toLocaleTimeString();
+      
+      let text = `[${timestamp}] ${action}\n\n`;
+      
+      if (measurements) {
+        for (const [key, value] of Object.entries(measurements)) {
+          text += `${key}: ${value}\n`;
+        }
+      } else {
+        text += 'No measurements available';
+      }
+      
+      output.innerHTML = `<pre>${text}</pre>`;
+    }
+    
+    // Apply settings button
+    document.getElementById('applySettings').addEventListener('click', () => {
+      const enableMeasurements = document.getElementById('enableMeasurements').checked;
+      const showTooltip = document.getElementById('showTooltip').checked;
+      const showTooltipOnHover = document.getElementById('showTooltipOnHover').checked;
+      const displayFormat = document.getElementById('displayFormat').value;
+      
+      map.pm.setGlobalOptions({
+        measurements: {
+          measurement: enableMeasurements,
+          displayFormat: displayFormat,
+          showTooltip: showTooltip,
+          showTooltipOnHover: showTooltipOnHover,
+          totalLength: true,
+          segmentLength: true,
+          area: true,
+          radius: true,
+          perimeter: true,
+          height: true,
+          width: true,
+          coordinates: true,
+        }
+      });
+      
+      updateOutput('Settings Applied', {
+        measurement: enableMeasurements,
+        displayFormat: displayFormat,
+        showTooltip: showTooltip,
+        showTooltipOnHover: showTooltipOnHover,
+      });
+    });
+    
+    // Add some example layers
+    setTimeout(() => {
+      // Example polygon
+      const polygon = L.polygon([
+        [51.509, -0.08],
+        [51.503, -0.06],
+        [51.51, -0.047]
+      ]).addTo(map);
+      
+      polygon.pm.measurements = L.PM.Utils.getMeasurements(polygon, map, 'metric');
+      
+      // Example circle
+      const circle = L.circle([51.508, -0.11], {
+        radius: 500
+      }).addTo(map);
+      
+      circle.pm.measurements = L.PM.Utils.getMeasurements(circle, map, 'metric');
+      
+      updateOutput('Example Layers Added', {
+        message: 'Hover over the polygon or circle to see measurements'
+      });
+    }, 1000);
+  </script>
+</body>
+</html>

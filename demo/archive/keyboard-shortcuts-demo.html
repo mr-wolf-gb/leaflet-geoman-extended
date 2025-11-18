@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keyboard Shortcuts Demo - Leaflet-Geoman</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Leaflet-Geoman CSS -->
+  <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    
+    #map {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 300px;
+      bottom: 0;
+    }
+    
+    #sidebar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      bottom: 0;
+      background: #f5f5f5;
+      padding: 20px;
+      overflow-y: auto;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #333;
+    }
+    
+    h2 {
+      font-size: 16px;
+      color: #555;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 5px;
+    }
+    
+    .shortcut-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .shortcut-item {
+      background: white;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .shortcut-key {
+      display: inline-block;
+      background: #333;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: bold;
+      margin-right: 8px;
+    }
+    
+    .shortcut-desc {
+      color: #666;
+      font-size: 13px;
+    }
+    
+    .control-section {
+      margin-top: 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #3388ff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    
+    button:hover {
+      background: #2277ee;
+    }
+    
+    button.danger {
+      background: #ff4444;
+    }
+    
+    button.danger:hover {
+      background: #ee3333;
+    }
+    
+    button.success {
+      background: #44ff44;
+      color: #333;
+    }
+    
+    button.success:hover {
+      background: #33ee33;
+    }
+    
+    .status {
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    
+    .status.enabled {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .status.disabled {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .note {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #856404;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  
+  <div id="sidebar">
+    <h1>⌨️ Keyboard Shortcuts Demo</h1>
+    
+    <h2>Available Shortcuts</h2>
+    <ul class="shortcut-list">
+      <li class="shortcut-item">
+        <span class="shortcut-key">ESC</span>
+        <span class="shortcut-desc">Finish/cancel drawing or exit any mode</span>
+      </li>
+      <li class="shortcut-item">
+        <span class="shortcut-key">ENTER</span>
+        <span class="shortcut-desc">Finish drawing</span>
+      </li>
+      <li class="shortcut-item">
+        <span class="shortcut-key">BACKSPACE</span>
+        <span class="shortcut-desc">Remove last vertex</span>
+      </li>
+      <li class="shortcut-item">
+        <span class="shortcut-key">DELETE</span>
+        <span class="shortcut-desc">Remove last vertex</span>
+      </li>
+      <li class="shortcut-item">
+        <span class="shortcut-key">CTRL+Z</span>
+        <span class="shortcut-desc">Undo last vertex</span>
+      </li>
+    </ul>
+    
+    <h2>ESC Key Works With</h2>
+    <ul class="shortcut-list">
+      <li class="shortcut-item">
+        <span class="shortcut-desc">✓ Drawing modes (Polygon, Line, etc.)</span>
+      </li>
+      <li class="shortcut-item">
+        <span class="shortcut-desc">✓ Edit mode</span>
+      </li>
+      <li class="shortcut-item">
+        <span class="shortcut-desc">✓ Drag mode</span>
+      </li>
+      <li class="shortcut-item">
+        <span class="shortcut-desc">✓ Cut mode</span>
+      </li>
+      <li class="shortcut-item">
+        <span class="shortcut-desc">✓ Rotate mode</span>
+      </li>
+      <li class="shortcut-item">
+        <span class="shortcut-desc">✓ Copy mode</span>
+      </li>
+      <li class="shortcut-item">
+        <span class="shortcut-desc">✓ Removal mode</span>
+      </li>
+    </ul>
+    
+    <h2>Quick Start - Drawing</h2>
+    <div class="control-section">
+      <button onclick="startDrawing('Polygon')">Draw Polygon</button>
+      <button onclick="startDrawing('Line')">Draw Line</button>
+      <button onclick="startDrawing('Rectangle')">Draw Rectangle</button>
+      <button onclick="startDrawing('Circle')">Draw Circle</button>
+      <button onclick="startDrawing('Marker')">Add Marker</button>
+    </div>
+    
+    <h2>Quick Start - Edit Modes</h2>
+    <div class="control-section">
+      <button onclick="toggleEditMode()">Toggle Edit Mode</button>
+      <button onclick="toggleDragMode()">Toggle Drag Mode</button>
+      <button onclick="toggleCutMode()">Toggle Cut Mode</button>
+      <button onclick="toggleRotateMode()">Toggle Rotate Mode</button>
+      <button onclick="toggleRemovalMode()">Toggle Removal Mode</button>
+    </div>
+    
+    <h2>Keyboard Controls</h2>
+    <div class="control-section">
+      <button id="toggleShortcuts" onclick="toggleKeyboardShortcuts()">
+        Disable Shortcuts
+      </button>
+      <div id="shortcutStatus" class="status enabled">
+        ✓ Keyboard shortcuts are enabled
+      </div>
+    </div>
+    
+    <div class="note">
+      <strong>💡 Tip:</strong> Start drawing a polygon or line, then try pressing ESC to finish, 
+      or BACKSPACE to remove the last vertex. ESC also exits any active edit mode!
+    </div>
+    
+    <div class="note" style="margin-top: 10px;">
+      <strong>🎯 Try it:</strong> Enable Edit Mode, then press ESC to exit. Works with all modes!
+    </div>
+    
+    <div class="note" style="margin-top: 10px;">
+      <strong>📝 Note:</strong> Shortcuts are disabled when typing in input fields to prevent conflicts.
+    </div>
+  </div>
+  
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Leaflet-Geoman JS -->
+  <script src="../dist/leaflet-geoman.js"></script>
+  
+  <script>
+    // Initialize the map
+    const map = L.map('map').setView([51.505, -0.09], 13);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Add Leaflet-Geoman controls
+    map.pm.addControls({
+      position: 'topleft',
+      drawCircle: true,
+      drawMarker: true,
+      drawPolygon: true,
+      drawPolyline: true,
+      drawRectangle: true,
+      editMode: true,
+      dragMode: true,
+      cutPolygon: true,
+      removalMode: true,
+    });
+    
+    // Enable measurements
+    map.pm.setGlobalOptions({
+      measurements: {
+        measurement: true,
+        displayFormat: 'metric'
+      }
+    });
+    
+    // Helper function to start drawing
+    function startDrawing(shape) {
+      map.pm.enableDraw(shape);
+    }
+    
+    // Helper functions for edit modes
+    function toggleEditMode() {
+      if (map.pm.globalEditModeEnabled()) {
+        map.pm.disableGlobalEditMode();
+      } else {
+        map.pm.enableGlobalEditMode();
+      }
+    }
+    
+    function toggleDragMode() {
+      if (map.pm.globalDragModeEnabled()) {
+        map.pm.disableGlobalDragMode();
+      } else {
+        map.pm.enableGlobalDragMode();
+      }
+    }
+    
+    function toggleCutMode() {
+      if (map.pm.globalCutModeEnabled()) {
+        map.pm.disableGlobalCutMode();
+      } else {
+        map.pm.enableGlobalCutMode();
+      }
+    }
+    
+    function toggleRotateMode() {
+      if (map.pm.globalRotateModeEnabled()) {
+        map.pm.disableGlobalRotateMode();
+      } else {
+        map.pm.enableGlobalRotateMode();
+      }
+    }
+    
+    function toggleRemovalMode() {
+      if (map.pm.globalRemovalModeEnabled()) {
+        map.pm.disableGlobalRemovalMode();
+      } else {
+        map.pm.enableGlobalRemovalMode();
+      }
+    }
+    
+    // Toggle keyboard shortcuts
+    function toggleKeyboardShortcuts() {
+      const button = document.getElementById('toggleShortcuts');
+      const status = document.getElementById('shortcutStatus');
+      
+      if (map.pm.keyboardShortcutsEnabled()) {
+        map.pm.disableKeyboardShortcuts();
+        button.textContent = 'Enable Shortcuts';
+        button.classList.add('success');
+        status.textContent = '✗ Keyboard shortcuts are disabled';
+        status.classList.remove('enabled');
+        status.classList.add('disabled');
+      } else {
+        map.pm.enableKeyboardShortcuts();
+        button.textContent = 'Disable Shortcuts';
+        button.classList.remove('success');
+        status.textContent = '✓ Keyboard shortcuts are enabled';
+        status.classList.remove('disabled');
+        status.classList.add('enabled');
+      }
+    }
+    
+    // Event listeners for feedback
+    map.on('pm:drawstart', function(e) {
+      console.log('Drawing started:', e.shape);
+    });
+    
+    map.on('pm:drawend', function(e) {
+      console.log('Drawing ended:', e.shape);
+    });
+    
+    map.on('pm:create', function(e) {
+      console.log('Layer created:', e.shape, e.layer);
+    });
+    
+    map.on('pm:keyevent', function(e) {
+      console.log('Key event:', e.event.key, e.eventType, e.focusOn);
+    });
+    
+    // Log when vertices are added/removed
+    map.on('pm:vertexadded', function(e) {
+      console.log('Vertex added');
+    });
+    
+    map.on('pm:vertexremoved', function(e) {
+      console.log('Vertex removed via keyboard shortcut');
+    });
+    
+    // Log edit mode toggles
+    map.on('pm:globaleditmodetoggled', function(e) {
+      console.log('Edit mode toggled:', e.enabled);
+    });
+    
+    map.on('pm:globaldragmodetoggled', function(e) {
+      console.log('Drag mode toggled:', e.enabled);
+    });
+    
+    map.on('pm:globalcutmodetoggled', function(e) {
+      console.log('Cut mode toggled:', e.enabled);
+    });
+    
+    map.on('pm:globalrotatemodetoggled', function(e) {
+      console.log('Rotate mode toggled:', e.enabled);
+    });
+    
+    map.on('pm:globalremovalmodetoggled', function(e) {
+      console.log('Removal mode toggled:', e.enabled);
+    });
+  </script>
+</body>
+</html>

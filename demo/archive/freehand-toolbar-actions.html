@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Freehand Toolbar Actions Test</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+    .instructions {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      max-width: 350px;
+    }
+    .instructions h3 {
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+    .instructions ol {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    .instructions li {
+      margin: 8px 0;
+      line-height: 1.5;
+    }
+    .status {
+      margin-top: 15px;
+      padding: 10px;
+      background: #e3f2fd;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="instructions">
+    <h3>🎨 Freehand Toolbar Actions</h3>
+    <ol>
+      <li>Click the <strong>Freehand</strong> button (✏️ icon) in the toolbar</li>
+      <li>You'll see action buttons appear: <strong>Line</strong>, <strong>Polygon</strong>, <strong>Cancel</strong></li>
+      <li>Click <strong>Line</strong> to draw freehand lines</li>
+      <li>Click <strong>Polygon</strong> to draw freehand polygons</li>
+      <li>Click and drag on the map to draw</li>
+    </ol>
+    <div class="status" id="status">
+      Click the Freehand button to start
+    </div>
+  </div>
+  
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="../dist/leaflet-geoman.js"></script>
+  <script>
+    // Initialize the map
+    const map = L.map('map').setView([51.505, -0.09], 13);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add Leaflet-Geoman controls with Freehand enabled
+    map.pm.addControls({
+      position: 'topleft',
+      drawMarker: false,
+      drawPolyline: false,
+      drawFreehand: true,  // This will show Line/Polygon/Cancel actions
+      drawPolygon: false,
+      drawRectangle: false,
+      drawCircle: false,
+      editMode: true,
+      dragMode: false,
+      cutPolygon: false,
+      removalMode: true,
+    });
+
+    const status = document.getElementById('status');
+
+    // Event Listeners
+    map.on('pm:drawstart', (e) => {
+      console.log('Drawing started:', e.shape);
+      const mode = map.pm.Draw.Freehand._fillMode ? 'Polygon' : 'Line';
+      status.textContent = `✍️ Drawing ${mode} mode - Click and drag`;
+      status.style.background = map.pm.Draw.Freehand._fillMode ? '#ffebee' : '#e3f2fd';
+    });
+
+    map.on('pm:create', (e) => {
+      console.log('Shape created:', e);
+      const shapeType = e.layer instanceof L.Polygon ? 'Polygon' : 'Polyline';
+      status.textContent = `✅ ${shapeType} created!`;
+      
+      setTimeout(() => {
+        status.textContent = 'Click Line or Polygon to draw again';
+      }, 2000);
+    });
+
+    map.on('pm:drawend', (e) => {
+      console.log('Drawing ended:', e.shape);
+    });
+
+    map.on('pm:globaldrawmodetoggled', (e) => {
+      console.log('Global draw mode toggled:', e);
+      if (!e.enabled) {
+        status.textContent = 'Click the Freehand button to start';
+        status.style.background = '#e3f2fd';
+      }
+    });
+  </script>
+</body>
+</html>

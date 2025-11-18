@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet-Geoman Arabic RTL Demo</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Leaflet-Geoman CSS -->
+    <link rel="stylesheet" href="../../dist/leaflet-geoman.css" />
+    
+    <!-- RTL CSS -->
+    <link rel="stylesheet" href="../../src/css/rtl.css" />
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: rtl;
+        }
+        
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 300px;
+            direction: rtl;
+            text-align: right;
+        }
+        
+        .info-panel h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .language-selector {
+            margin-top: 10px;
+        }
+        
+        .language-selector button {
+            margin: 5px;
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .language-selector button:hover {
+            background: #f0f0f0;
+        }
+        
+        .language-selector button.active {
+            background: #007cff;
+            color: white;
+            border-color: #007cff;
+        }
+    </style>
+</head>
+<body>
+    <div class="info-panel">
+        <h3>🌍 دعم اللغة العربية (RTL)</h3>
+        <p>هذا العرض التوضيحي يوضح دعم اللغة العربية مع التخطيط من اليمين إلى اليسار (RTL)</p>
+        
+        <div class="language-selector">
+            <strong>اختر اللغة:</strong><br>
+            <button onclick="changeLanguage('ar')" class="active" id="lang-ar">العربية</button>
+            <button onclick="changeLanguage('en')" id="lang-en">English</button>
+            <button onclick="changeLanguage('fr')" id="lang-fr">Français</button>
+        </div>
+        
+        <div class="language-selector" style="margin-top: 15px;">
+            <strong>موضع شريط الأدوات:</strong><br>
+            <button onclick="changePosition('topleft')" class="active" id="pos-topleft">أعلى يسار</button>
+            <button onclick="changePosition('topright')" id="pos-topright">أعلى يمين</button>
+            <button onclick="changePosition('bottomleft')" id="pos-bottomleft">أسفل يسار</button>
+            <button onclick="changePosition('bottomright')" id="pos-bottomright">أسفل يمين</button>
+        </div>
+    </div>
+    
+    <div id="map"></div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Leaflet-Geoman JS -->
+    <script src="../../dist/leaflet-geoman.js"></script>
+    
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([24.7136, 46.6753], 12); // Riyadh, Saudi Arabia
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Initialize Leaflet-Geoman with Arabic language
+        map.pm.setLang('ar');
+        
+        // Add Leaflet-Geoman controls
+        // Note: Positions are literal - 'topleft' = top-left, 'topright' = top-right
+        map.pm.addControls({
+            position: 'topleft', // Literally top-left corner
+            drawMarker: true,
+            drawCircleMarker: true,
+            drawPolyline: true,
+            drawRectangle: true,
+            drawPolygon: true,
+            drawCircle: true,
+            drawText: true,
+            editMode: true,
+            dragMode: true,
+            cutPolygon: true,
+            removalMode: true,
+            rotateMode: true,
+            library: true
+        });
+        
+        // Enable measurements
+        map.pm.setGlobalOptions({
+            measurements: {
+                measurement: true,
+                displayFormat: 'metric',
+                totalLength: true,
+                segmentLength: true,
+                area: true,
+                radius: true,
+                perimeter: true,
+                height: true,
+                width: true,
+            },
+            library: {
+                enabled: true,
+                json: null,
+                url: '../demo-categories.json',
+                autoLoad: true,
+                urlOptions: {
+                    cache: true,
+                    timeout: 10000
+                }
+            }
+        });
+        
+        // Function to change language
+        function changeLanguage(lang) {
+            // Option 1: Auto-detect RTL from language
+            map.pm.setLang(lang);
+            
+            // Option 2: Explicitly set RTL (uncomment to use)
+            // map.pm.setLang(lang, null, 'en', { rtl: true });
+            
+            // Option 3: Set RTL independently (uncomment to use)
+            // map.pm.setLang(lang);
+            // map.pm.setRTL(lang === 'ar'); // Manually control RTL
+            
+            // Update active button
+            document.querySelectorAll('#lang-ar, #lang-en, #lang-fr').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('lang-' + lang).classList.add('active');
+            
+            // Update document language attribute
+            document.documentElement.setAttribute('lang', lang);
+        }
+        
+        // Function to change toolbar position
+        function changePosition(position) {
+            // Remove existing controls
+            map.pm.removeControls();
+            
+            // Add controls with new position
+            map.pm.addControls({
+                position: position,
+                drawMarker: true,
+                drawCircleMarker: true,
+                drawPolyline: true,
+                drawRectangle: true,
+                drawPolygon: true,
+                drawCircle: true,
+                drawText: true,
+                editMode: true,
+                dragMode: true,
+                cutPolygon: true,
+                removalMode: true,
+                rotateMode: true,
+            });
+            
+            // Update active button
+            document.querySelectorAll('[id^="pos-"]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('pos-' + position).classList.add('active');
+        }
+        
+        // Log events for demonstration
+        map.on('pm:create', (e) => {
+            console.log('تم إنشاء شكل جديد:', e.shape);
+            console.log('الطبقة:', e.layer);
+        });
+        
+        map.on('pm:edit', (e) => {
+            console.log('تم تحرير الطبقة:', e.layer);
+        });
+        
+        map.on('pm:remove', (e) => {
+            console.log('تم حذف الطبقة:', e.layer);
+        });
+    </script>
+</body>
+</html>

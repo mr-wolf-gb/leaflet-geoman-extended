@@ -1,0 +1,15 @@
+npm-debug.log
+.DS_Store
+/node_modules/
+/bower_components/
+/.idea/
+/.kiro/
+/.vscode/
+/dist/
+\.source*
+/cypress/downloads
+/cypress/screenshots
+/cypress/videos
+.eslintcache
+.env
+*.tgz

@@ -1,0 +1,311 @@
+/* ============================================
+   Unified Modal System for Leaflet-Geoman
+   ============================================ */
+
+/* Modal Overlay - Full screen backdrop */
+.pm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+/* Modal Container */
+.pm-modal {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modal Content Wrapper */
+.pm-modal-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Modal Header */
+.pm-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f8f8;
+  flex-shrink: 0;
+}
+
+.pm-modal-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.pm-modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  font-weight: 300;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.pm-modal-close:hover {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+/* Modal Body */
+.pm-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Modal Footer */
+.pm-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f8f8f8;
+  flex-shrink: 0;
+}
+
+.pm-modal-footer:empty {
+  display: none;
+}
+
+/* Modal Buttons */
+.pm-modal-button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 100px;
+}
+
+.pm-modal-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pm-modal-button:active {
+  transform: translateY(0);
+}
+
+.pm-modal-button-cancel {
+  background: #6c757d;
+  color: white;
+}
+
+.pm-modal-button-cancel:hover {
+  background: #5a6268;
+}
+
+.pm-modal-button-primary {
+  background: #007bff;
+  color: white;
+}
+
+.pm-modal-button-primary:hover {
+  background: #0056b3;
+}
+
+.pm-modal-button-success {
+  background: #28a745;
+  color: white;
+}
+
+.pm-modal-button-success:hover {
+  background: #218838;
+}
+
+.pm-modal-button-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.pm-modal-button-danger:hover {
+  background: #c82333;
+}
+
+/* Form Fields */
+.pm-modal-field {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.pm-modal-field label {
+  font-size: 14px;
+  color: #333;
+  min-width: 140px;
+  font-weight: 500;
+}
+
+.pm-modal-field input[type='text'],
+.pm-modal-field input[type='number'],
+.pm-modal-field select,
+.pm-modal-field textarea {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.pm-modal-field input[type='text']:focus,
+.pm-modal-field input[type='number']:focus,
+.pm-modal-field select:focus,
+.pm-modal-field textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.pm-modal-field input[type='color'] {
+  width: 60px;
+  height: 36px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.pm-modal-field input[type='range'] {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #e0e0e0;
+  outline: none;
+}
+
+.pm-modal-field input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pm-modal-field input[type='range']::-webkit-slider-thumb:hover {
+  background: #0056b3;
+  transform: scale(1.1);
+}
+
+.pm-modal-field input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.pm-modal-field input[type='range']::-moz-range-thumb:hover {
+  background: #0056b3;
+  transform: scale(1.1);
+}
+
+/* Section Styles */
+.pm-modal-section {
+  margin-bottom: 20px;
+}
+
+.pm-modal-section:last-child {
+  margin-bottom: 0;
+}
+
+.pm-modal-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .pm-modal {
+    width: 95% !important;
+    max-width: none !important;
+    max-height: 95vh;
+  }
+
+  .pm-modal-header,
+  .pm-modal-body,
+  .pm-modal-footer {
+    padding: 12px 16px;
+  }
+
+  .pm-modal-field {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pm-modal-field label {
+    min-width: auto;
+    margin-bottom: 4px;
+  }
+
+  .pm-modal-field input[type='text'],
+  .pm-modal-field input[type='number'],
+  .pm-modal-field select,
+  .pm-modal-field textarea {
+    width: 100%;
+  }
+
+  .pm-modal-button {
+    min-width: 80px;
+    padding: 8px 16px;
+  }
+}
+
+/* RTL Support */
+[dir='rtl'] .pm-modal-header {
+  flex-direction: row-reverse;
+}
+
+[dir='rtl'] .pm-modal-footer {
+  flex-direction: row-reverse;
+}
+
+[dir='rtl'] .pm-modal-field {
+  flex-direction: row-reverse;
+}
+
+[dir='rtl'] .pm-modal-field label {
+  text-align: right;
+}

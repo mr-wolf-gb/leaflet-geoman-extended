@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distance Line Drawing Demo</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Leaflet-Geoman CSS -->
+  <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+    
+    .info-panel {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+      max-width: 350px;
+    }
+    
+    .info-panel h2 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #333;
+    }
+    
+    .info-panel h3 {
+      margin-top: 15px;
+      font-size: 16px;
+      color: #555;
+    }
+    
+    .info-panel p {
+      margin: 8px 0;
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    .info-panel ul {
+      margin: 8px 0;
+      padding-left: 20px;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .info-panel li {
+      margin: 5px 0;
+    }
+    
+    .info-panel code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    
+    .highlight {
+      background: #fff3cd;
+      padding: 10px;
+      border-left: 3px solid #ffc107;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  
+  <div class="info-panel">
+    <h2>📏 Distance Line Drawing</h2>
+    
+    <div class="highlight">
+      <strong>Click the Distance Line button</strong> (line icon with ruler) in the toolbar to start!
+    </div>
+    
+    <h3>How it works:</h3>
+    <ul>
+      <li>Click the <strong>Distance Line</strong> button</li>
+      <li>Enter a distance interval (e.g., 2)</li>
+      <li>Select unit (km or m)</li>
+      <li>Click <strong>Start Drawing</strong></li>
+      <li>Click on the map to place vertices</li>
+      <li>Labels show cumulative distances (2km, 4km, 6km...)</li>
+      <li>Double-click to finish drawing</li>
+    </ul>
+    
+    <h3>Example:</h3>
+    <p>
+      <strong>Input:</strong> <code>2 km</code><br>
+      <strong>Labels:</strong> 2km → 4km → 6km → 8km...
+    </p>
+    
+    <p style="margin-top: 15px; font-size: 13px; color: #888;">
+      💡 Tip: Each segment will be labeled with cumulative distance
+    </p>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Leaflet-Geoman JS -->
+  <script src="../dist/leaflet-geoman.js"></script>
+  
+  <script>
+    // Initialize map centered on a location similar to the image
+    const map = L.map('map').setView([47.5, 13.0], 11);
+    
+    // Add OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(map);
+    
+    // Add Leaflet-Geoman controls with the new Distance Line button
+    map.pm.addControls({
+      position: 'topleft',
+      drawMarker: true,
+      drawPolyline: true,
+      drawDistanceLine: true,  // Enable the new Distance Line button
+      drawPolygon: true,
+      drawRectangle: true,
+      drawCircle: true,
+      editMode: true,
+      dragMode: true,
+      cutPolygon: true,
+      removalMode: true,
+    });
+    
+    // Set default line style
+    map.pm.setGlobalOptions({
+      pathOptions: {
+        color: '#3388ff',
+        weight: 4,
+        opacity: 0.8,
+      }
+    });
+    
+    // Listen for layer creation
+    map.on('pm:create', (e) => {
+      console.log('Layer created:', e);
+      const layer = e.layer;
+      
+      // If it's a distance line, log the distance values
+      if (layer._distanceValues) {
+        console.log('Distance values:', layer._distanceValues);
+      }
+      
+      // Make the layer editable
+      layer.pm.enable();
+    });
+    
+    // Listen for drawing start
+    map.on('pm:drawstart', (e) => {
+      console.log('Drawing started:', e.shape);
+    });
+    
+    // Listen for drawing end
+    map.on('pm:drawend', (e) => {
+      console.log('Drawing ended:', e.shape);
+    });
+  </script>
+</body>
+</html>

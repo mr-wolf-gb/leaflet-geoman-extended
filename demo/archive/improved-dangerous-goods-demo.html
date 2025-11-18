@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Improved Dangerous Goods Zones - Individual Labels</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="./dist/leaflet-geoman.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-width: 300px;
+        }
+        .feature-list {
+            margin: 10px 0;
+        }
+        .feature-list li {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .color-demo {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .btn {
+            background: #007cff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn.secondary {
+            background: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div class="info-panel">
+        <h3>🚨 Dangerous Goods Zones</h3>
+        
+        <p><strong>New Feature:</strong> Individual labels on each circle!</p>
+        
+        <div class="feature-list">
+            <h4>Zone Colors & Distances:</h4>
+            <ul>
+                <li><span class="color-demo" style="background: #ff0000;"></span>Red: 30m (High Risk)</li>
+                <li><span class="color-demo" style="background: #ff8800;"></span>Orange: 60m (Medium Risk)</li>
+                <li><span class="color-demo" style="background: #ffff00;"></span>Yellow: 300m (Low Risk)</li>
+                <li><span class="color-demo" style="background: #00ff00;"></span>Green: 1000m (Safe Zone)</li>
+            </ul>
+        </div>
+
+        <div class="feature-list">
+            <h4>Features:</h4>
+            <ul>
+                <li>✅ Modal configuration</li>
+                <li>✅ Individual circle labels</li>
+                <li>✅ Unified movement</li>
+                <li>✅ Color-coded zones</li>
+                <li>✅ Customizable distances</li>
+            </ul>
+        </div>
+
+        <div>
+            <button class="btn" onclick="createTestZones()">Create Test Zones</button>
+            <button class="btn secondary" onclick="clearAllZones()">Clear All</button>
+            <button class="btn" onclick="enableEditMode()">Enable Edit Mode</button>
+        </div>
+
+        <div style="margin-top: 15px; font-size: 12px; color: #666;">
+            <strong>Instructions:</strong><br>
+            1. Click the dangerous goods button in toolbar<br>
+            2. Configure distances in modal<br>
+            3. Click OK and place on map<br>
+            4. Notice labels on each circle's edge!
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="./dist/leaflet-geoman.min.js"></script>
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([51.505, -0.09], 14);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+map.pm.setLang("ar");
+        // Add Leaflet-Geoman controls
+        map.pm.addControls({
+            position: 'topleft',
+            drawDangerousGoodsZones: true,
+            drawMarker: true,
+            drawCircle: true,
+            drawPolygon: true,
+            editMode: true,
+            dragMode: true,
+            removalMode: true,
+        });
+
+        
+
+        let dangerousGoodsZones = [];
+
+        // Create test zones programmatically
+        function createTestZones() {
+            // Set custom zones for demonstration
+            map.pm.Draw.DangerousGoodsZones._zones = [
+                { name: 'Roter Kreis', distance: 50, color: '#ff0000', fillOpacity: 0.3 },
+                { name: 'Oranger Kreis', distance: 100, color: '#ff8800', fillOpacity: 0.25 },
+                { name: 'Gelber Kreis', distance: 250, color: '#ffff00', fillOpacity: 0.2 },
+                { name: 'Grüner Kreis', distance: 500, color: '#00ff00', fillOpacity: 0.15 }
+            ];
+
+            // Enable drawing mode
+            map.pm.Draw.DangerousGoodsZones.enable({
+                snappable: true,
+                tooltips: true,
+                continueDrawing: false
+            });
+        }
+
+        // Clear all zones
+        function clearAllZones() {
+            dangerousGoodsZones.forEach(zone => {
+                if (map.hasLayer(zone)) {
+                    map.removeLayer(zone);
+                }
+            });
+            dangerousGoodsZones = [];
+        }
+
+        // Enable edit mode for all dangerous goods zones
+        function enableEditMode() {
+            dangerousGoodsZones.forEach(zone => {
+                if (zone.pm) {
+                    zone.pm.enable();
+                    console.log('Edit mode enabled for dangerous goods zone - now you can drag the entire group');
+                }
+            });
+            
+            if (dangerousGoodsZones.length === 0) {
+                console.log('No dangerous goods zones to edit. Create some first!');
+            }
+        }
+
+        // Listen for zone creation
+        map.on('pm:create', function(e) {
+            if (e.layer._dangerousGoodsZones) {
+                dangerousGoodsZones.push(e.layer);
+                console.log('Dangerous goods zones created with individual labels!');
+                
+                // Note: Edit mode is not automatically enabled
+                // Uncomment the next line if you want automatic edit mode:
+                // e.layer.pm.enable();
+                
+                // Count the layers to verify labels are created
+                let circleCount = 0;
+                let labelCount = 0;
+                e.layer.eachLayer(function(layer) {
+                    if (layer instanceof L.Circle) {
+                        circleCount++;
+                    } else if (layer.options && layer.options.icon && layer.options.icon.options.className === 'dangerous-goods-zone-label') {
+                        labelCount++;
+                    }
+                });
+                
+                console.log(`Created ${circleCount} circles and ${labelCount} labels`);
+            }
+        });
+
+        // Add some reference points
+        const referencePoints = [
+            { pos: [51.505, -0.09], name: "Central Point", color: "blue" },
+            { pos: [51.507, -0.087], name: "North Point", color: "green" },
+            { pos: [51.503, -0.093], name: "South Point", color: "purple" }
+        ];
+
+        referencePoints.forEach(point => {
+            L.marker(point.pos)
+                .addTo(map)
+                .bindPopup(`<b>${point.name}</b><br>Good for testing zone placement`)
+                .setIcon(L.divIcon({
+                    className: 'reference-marker',
+                    html: `<div style="background: ${point.color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>`,
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                }));
+        });
+
+        console.log('Improved dangerous goods zones demo loaded!');
+    </script>
+</body>
+</html>

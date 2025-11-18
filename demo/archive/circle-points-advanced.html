@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Circle Drawing Demo</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+    .controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+      max-width: 350px;
+    }
+    .controls h3 {
+      margin-top: 0;
+      color: #333;
+      border-bottom: 2px solid #3388ff;
+      padding-bottom: 10px;
+    }
+    .controls h4 {
+      margin-top: 15px;
+      margin-bottom: 8px;
+      color: #555;
+    }
+    .controls ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .controls li {
+      margin: 5px 0;
+      line-height: 1.5;
+    }
+    .button-group {
+      margin: 15px 0;
+    }
+    .btn {
+      display: inline-block;
+      padding: 8px 15px;
+      margin: 5px 5px 5px 0;
+      background: #3388ff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background: #2266dd;
+    }
+    .btn.active {
+      background: #ff6633;
+    }
+    .event-log {
+      margin-top: 15px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 12px;
+      font-family: monospace;
+    }
+    .event-log .event {
+      padding: 3px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    .event-log .event:last-child {
+      border-bottom: none;
+    }
+    .event-log .event-type {
+      color: #3388ff;
+      font-weight: bold;
+    }
+    .stats {
+      margin-top: 10px;
+      padding: 10px;
+      background: #e8f4f8;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .stats strong {
+      color: #2266dd;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="controls">
+    <h3>🎯 Circle Drawing Modes</h3>
+    
+    <h4>Drawing Methods:</h4>
+    <ul>
+      <li><strong>Standard Circle:</strong> Center + radius</li>
+      <li><strong>2 Points:</strong> Diameter endpoints</li>
+      <li><strong>3 Points:</strong> Circumference points</li>
+    </ul>
+
+    <div class="button-group">
+      <button class="btn" onclick="enableMode('Circle')">Standard Circle</button>
+      <button class="btn" onclick="enableMode('Circle2Points')">2 Points</button>
+      <button class="btn" onclick="enableMode('Circle3Points')">3 Points</button>
+      <button class="btn" onclick="disableAll()">Cancel</button>
+    </div>
+
+    <div class="stats">
+      <strong>Circles Created:</strong> <span id="circleCount">0</span><br>
+      <strong>Active Mode:</strong> <span id="activeMode">None</span>
+    </div>
+
+    <h4>Recent Events:</h4>
+    <div class="event-log" id="eventLog">
+      <div class="event">Waiting for events...</div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="../dist/leaflet-geoman.js"></script>
+  <script>
+    // Initialize map
+    const map = L.map('map').setView([51.505, -0.09], 13);
+
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add Leaflet-Geoman controls
+    map.pm.addControls({
+      position: 'topleft',
+      drawCircle: true,
+      drawCircle2Points: true,
+      drawCircle3Points: true,
+      drawMarker: false,
+      drawPolyline: false,
+      drawPolygon: false,
+      drawRectangle: false,
+      drawCircleMarker: false,
+      drawText: false,
+      drawArrow: false,
+      editMode: true,
+      dragMode: true,
+      cutPolygon: false,
+      removalMode: true,
+      rotateMode: false
+    });
+
+    // Set global options for better visuals
+    map.pm.setGlobalOptions({
+      pathOptions: {
+        color: '#3388ff',
+        fillColor: '#3388ff',
+        fillOpacity: 0.3,
+        weight: 2
+      },
+      templineStyle: {
+        color: '#ff6633',
+        weight: 2
+      },
+      hintlineStyle: {
+        color: '#ff6633',
+        dashArray: '5,5',
+        weight: 2
+      }
+    });
+
+    // Track statistics
+    let circleCount = 0;
+    let currentMode = 'None';
+
+    // Helper function to log events
+    function logEvent(type, details) {
+      const eventLog = document.getElementById('eventLog');
+      const eventDiv = document.createElement('div');
+      eventDiv.className = 'event';
+      const timestamp = new Date().toLocaleTimeString();
+      eventDiv.innerHTML = `<span class="event-type">${type}</span> - ${details} <small>(${timestamp})</small>`;
+      
+      if (eventLog.firstChild.textContent === 'Waiting for events...') {
+        eventLog.innerHTML = '';
+      }
+      
+      eventLog.insertBefore(eventDiv, eventLog.firstChild);
+      
+      // Keep only last 10 events
+      while (eventLog.children.length > 10) {
+        eventLog.removeChild(eventLog.lastChild);
+      }
+    }
+
+    // Helper functions for buttons
+    function enableMode(shape) {
+      map.pm.enableDraw(shape, {
+        snappable: true,
+        cursorMarker: true,
+        continueDrawing: false
+      });
+      currentMode = shape;
+      document.getElementById('activeMode').textContent = shape;
+      logEvent('MODE', `${shape} drawing enabled`);
+      
+      // Update button states
+      document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function disableAll() {
+      map.pm.disableDraw();
+      currentMode = 'None';
+      document.getElementById('activeMode').textContent = 'None';
+      logEvent('MODE', 'Drawing disabled');
+      document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+    }
+
+    // Event listeners
+    map.on('pm:create', (e) => {
+      circleCount++;
+      document.getElementById('circleCount').textContent = circleCount;
+      
+      const layer = e.layer;
+      
+      if (layer instanceof L.Circle) {
+        const center = layer.getLatLng();
+        const radius = layer.getRadius();
+        
+        logEvent('CREATE', `${e.shape} - Radius: ${radius.toFixed(2)}m`);
+        
+        // Add popup with detailed info
+        layer.bindPopup(`
+          <div style="font-family: sans-serif;">
+            <h4 style="margin: 0 0 10px 0; color: #3388ff;">${e.shape}</h4>
+            <strong>Center:</strong><br>
+            Lat: ${center.lat.toFixed(6)}<br>
+            Lng: ${center.lng.toFixed(6)}<br>
+            <strong>Radius:</strong> ${radius.toFixed(2)} meters<br>
+            <strong>Area:</strong> ${(Math.PI * radius * radius).toFixed(2)} m²<br>
+            <strong>Circumference:</strong> ${(2 * Math.PI * radius).toFixed(2)} m
+          </div>
+        `);
+        
+        // Auto-open popup
+        layer.openPopup();
+      }
+    });
+
+    map.on('pm:drawstart', (e) => {
+      logEvent('DRAW START', `Started drawing ${e.shape}`);
+    });
+
+    map.on('pm:drawend', (e) => {
+      logEvent('DRAW END', `Finished drawing ${e.shape}`);
+      currentMode = 'None';
+      document.getElementById('activeMode').textContent = 'None';
+      document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+    });
+
+    map.on('pm:remove', (e) => {
+      circleCount--;
+      document.getElementById('circleCount').textContent = circleCount;
+      logEvent('REMOVE', `Removed ${e.shape}`);
+    });
+
+    map.on('pm:globaldrawmodetoggled', (e) => {
+      logEvent('GLOBAL', `Draw mode ${e.enabled ? 'enabled' : 'disabled'} for ${e.shape}`);
+    });
+
+    // Add some example circles on load
+    setTimeout(() => {
+      // Example circle 1
+      const circle1 = L.circle([51.51, -0.1], {
+        radius: 500,
+        color: '#ff6633',
+        fillColor: '#ff6633',
+        fillOpacity: 0.2
+      }).addTo(map);
+      circle1.bindPopup('<strong>Example Circle</strong><br>Radius: 500m');
+      
+      logEvent('INFO', 'Example circle added to map');
+    }, 500);
+
+    // Log initial state
+    logEvent('INFO', 'Map initialized and ready');
+  </script>
+</body>
+</html>

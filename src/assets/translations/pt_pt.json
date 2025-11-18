@@ -1,0 +1,48 @@
+{
+  "tooltips": {
+    "placeMarker": "Clique para colocar marcador",
+    "firstVertex": "Clique para colocar primeiro vértice",
+    "continueLine": "Clique para continuar a desenhar",
+    "finishLine": "Clique num marcador existente para terminar",
+    "finishPoly": "Clique no primeiro marcador para terminar",
+    "finishRect": "Clique para terminar",
+    "startCircle": "Clique para colocar o centro do círculo",
+    "finishCircle": "Clique para terminar o círculo",
+    "placeCircleMarker": "Clique para colocar marcador de círculo",
+    "placeText": "Clique para colocar texto"
+  },
+  "actions": {
+    "finish": "Terminar",
+    "cancel": "Cancelar",
+    "removeLastVertex": "Remover Último Vértice"
+  },
+  "buttonTitles": {
+    "drawMarkerButton": "Desenhar Marcador",
+    "drawPolyButton": "Desenhar Polígonos",
+    "drawLineButton": "Desenhar Polilinha",
+    "drawCircleButton": "Desenhar Círculo",
+    "drawRectButton": "Desenhar Retângulo",
+    "editButton": "Editar Camadas",
+    "dragButton": "Arrastar Camadas",
+    "cutButton": "Cortar Camadas",
+    "deleteButton": "Remover Camadas",
+    "drawCircleMarkerButton": "Desenhar Marcador de Círculo",
+    "snappingButton": "Ajustar marcador arrastado a outras camadas e vértices",
+    "pinningButton": "Unir vértices partilhados",
+    "rotateButton": "Rodar Camadas",
+    "drawTextButton": "Desenhar Texto",
+    "scaleButton": "Escalar Camadas",
+    "autoTracingButton": "Traçado Automático de Linha"
+  },
+  "measurements": {
+    "totalLength": "Comprimento",
+    "segmentLength": "Comprimento do Segmento",
+    "area": "Área",
+    "radius": "Raio",
+    "perimeter": "Perímetro",
+    "height": "Altura",
+    "width": "Largura",
+    "coordinates": "Posição",
+    "coordinatesMarker": "Marcador de Posição"
+  }
+}

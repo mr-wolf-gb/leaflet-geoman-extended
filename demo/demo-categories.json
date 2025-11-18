@@ -1,0 +1,109 @@
+{
+  "categories": [
+    {
+      "id": "emergency",
+      "title": "Emergency Services",
+      "items": [
+        {
+        "id": "car-red",
+        "type": "image",
+        "src": "https://cdn-icons-png.flaticon.com/32/3774/3774299.png",
+        "width": 32,
+        "height": 32,
+        "title": "Red Car"
+    },
+    {
+        "id": "truck-blue",
+        "type": "image",
+        "src": "https://cdn-icons-png.flaticon.com/32/1085/1085003.png",
+        "width": 32,
+        "height": 32,
+        "title": "Blue Truck"
+    },
+    {
+        "id": "bus-green",
+        "type": "image",
+        "src": "https://cdn-icons-png.flaticon.com/32/1085/1085012.png",
+        "width": 32,
+        "height": 32,
+        "title": "Green Bus"
+    },
+        {
+          "id": "hospital",
+          "type": "font",
+          "icon": "fa fa-hospital",
+          "color": "#ff0000",
+          "title": "Hospital"
+        },
+        {
+          "id": "fire-station",
+          "type": "font",
+          "icon": "fa fa-fire-extinguisher",
+          "color": "#ff4444",
+          "title": "Fire Station"
+        },
+        {
+          "id": "police",
+          "type": "font",
+          "icon": "fa fa-shield-alt",
+          "color": "#0066cc",
+          "title": "Police Station"
+        }
+      ]
+    },
+    {
+      "id": "transport",
+      "title": "Transportation",
+      "items": [
+        {
+          "id": "bus-stop",
+          "type": "font",
+          "icon": "fa fa-bus",
+          "color": "#0066cc",
+          "title": "Bus Stop"
+        },
+        {
+          "id": "train-station",
+          "type": "font",
+          "icon": "fa fa-train",
+          "color": "#006600",
+          "title": "Train Station"
+        },
+        {
+          "id": "airport",
+          "type": "font",
+          "icon": "fa fa-plane",
+          "color": "#ff6600",
+          "title": "Airport"
+        }
+      ]
+    },
+    {
+      "id": "amenities",
+      "title": "Amenities",
+      "items": [
+        {
+          "id": "restaurant",
+          "type": "font",
+          "icon": "fa fa-utensils",
+          "color": "#ff9900",
+          "title": "Restaurant"
+        },
+        {
+          "id": "hotel",
+          "type": "font",
+          "icon": "fa fa-bed",
+          "color": "#9966cc",
+          "title": "Hotel"
+        },
+        {
+          "id": "gas-station",
+          "type": "font",
+          "icon": "fa fa-gas-pump",
+          "color": "#cc6600",
+          "title": "Gas Station"
+        }
+      ]
+    }
+  ]
+}

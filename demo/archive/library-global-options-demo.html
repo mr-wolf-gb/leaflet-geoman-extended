@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Library Global Options Demo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@latest/dist/leaflet.css" />
+    <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+    <link rel="stylesheet" href="demo.css" />
+    <style>
+        .demo-controls {
+            background: #f9f9f9;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .demo-controls h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .control-group button {
+            margin-right: 10px;
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .control-group button:hover {
+            background: #45a049;
+        }
+        
+        .control-group button.secondary {
+            background: #2196F3;
+        }
+        
+        .control-group button.secondary:hover {
+            background: #1976D2;
+        }
+        
+        .control-group button.danger {
+            background: #f44336;
+        }
+        
+        .control-group button.danger:hover {
+            background: #d32f2f;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-indicator.active {
+            background: #4CAF50;
+        }
+        
+        .status-indicator.inactive {
+            background: #f44336;
+        }
+        
+        .json-editor {
+            width: 100%;
+            height: 200px;
+            font-family: monospace;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        
+        .event-log {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .event-log .event {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        
+        .event-log .event.error {
+            color: #f44336;
+        }
+        
+        .event-log .event.warning {
+            color: #ff9800;
+        }
+        
+        .event-log .event.success {
+            color: #4CAF50;
+        }
+        
+        .url-input {
+            width: 300px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <article>
+            <h1>Library Global Options Demo</h1>
+            <h3>
+                Demonstration of the new Library integration with pm.setGlobalOptions() and pm.addControls()
+            </h3>
+        </article>
+
+        <article>
+            <div class="demo-controls">
+                <h3>Library Global Options Control</h3>
+                
+                <div class="control-group">
+                    <label>Library Status:</label>
+                    <span class="status-indicator inactive" id="libraryStatus"></span>
+                    <span id="libraryStatusText">Disabled</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Enable/Disable:</label>
+                    <button onclick="enableLibrary()">Enable Library</button>
+                    <button onclick="disableLibrary()" class="secondary">Disable Library</button>
+                    <button onclick="toggleControls()" class="secondary">Toggle Controls</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Load from JSON:</label>
+                    <button onclick="loadSampleJSON()">Load Sample JSON</button>
+                    <button onclick="loadCustomJSON()">Load Custom JSON</button>
+                    <button onclick="clearJSON()" class="danger">Clear JSON</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Load from URL:</label>
+                    <input type="text" id="urlInput" class="url-input" placeholder="Enter JSON URL..." value="test-categories.json">
+                    <button onclick="loadFromURL()">Load from URL</button>
+                    <button onclick="clearURL()" class="danger">Clear URL</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Actions:</label>
+                    <button onclick="refreshLibrary()">Smart Refresh</button>
+                    <button onclick="showCurrentOptions()" class="secondary">Show Current Options</button>
+                </div>
+            </div>
+        </article>
+
+        <article>
+            <div class="demo-controls">
+                <h3>Custom JSON Editor</h3>
+                <textarea id="jsonEditor" class="json-editor" placeholder="Enter custom JSON here..."></textarea>
+            </div>
+        </article>
+
+        <article>
+            <div class="demo-controls">
+                <h3>Event Log</h3>
+                <div id="eventLog" class="event-log"></div>
+                <button onclick="clearLog()" class="danger">Clear Log</button>
+            </div>
+        </article>
+
+        <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@latest/dist/leaflet.js"></script>
+    <script src="../dist/leaflet-geoman.js"></script>
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([51.505, -0.09], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Global variables
+        const eventLog = document.getElementById('eventLog');
+        const jsonEditor = document.getElementById('jsonEditor');
+        const libraryStatus = document.getElementById('libraryStatus');
+        const libraryStatusText = document.getElementById('libraryStatusText');
+        const urlInput = document.getElementById('urlInput');
+
+        // Sample JSON data
+        const sampleJSON = {
+            "categories": [
+                {
+                    "id": "emergency",
+                    "title": "Emergency Services",
+                    "items": [
+                        {
+                            "id": "hospital",
+                            "type": "font",
+                            "icon": "fa-hospital",
+                            "color": "#ff0000",
+                            "title": "Hospital"
+                        },
+                        {
+                            "id": "fire-station",
+                            "type": "font", 
+                            "icon": "fa-fire-extinguisher",
+                            "color": "#ff4444",
+                            "title": "Fire Station"
+                        }
+                    ]
+                },
+                {
+                    "id": "transport",
+                    "title": "Transportation",
+                    "items": [
+                        {
+                            "id": "bus-stop",
+                            "type": "font",
+                            "icon": "fa-bus",
+                            "color": "#0066cc",
+                            "title": "Bus Stop"
+                        },
+                        {
+                            "id": "train-station",
+                            "type": "font",
+                            "icon": "fa-train",
+                            "color": "#006600",
+                            "title": "Train Station"
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Initialize JSON editor with sample data
+        jsonEditor.value = JSON.stringify(sampleJSON, null, 2);
+
+        // Event logging function
+        function logEvent(eventName, data = {}, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const eventDiv = document.createElement('div');
+            eventDiv.className = `event ${type}`;
+            eventDiv.innerHTML = `[${timestamp}] <strong>${eventName}</strong>: ${JSON.stringify(data)}`;
+            eventLog.appendChild(eventDiv);
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+
+        // Update library status indicator
+        function updateLibraryStatus() {
+            const globalOptions = map.pm.getGlobalOptions();
+            const isEnabled = globalOptions && globalOptions.library && globalOptions.library.enabled;
+            
+            if (isEnabled) {
+                libraryStatus.className = 'status-indicator active';
+                libraryStatusText.textContent = 'Enabled';
+            } else {
+                libraryStatus.className = 'status-indicator inactive';
+                libraryStatusText.textContent = 'Disabled';
+            }
+        }
+
+        // Enable library
+        function enableLibrary() {
+            map.pm.setGlobalOptions({
+                library: {
+                    enabled: true,
+                    autoLoad: true
+                }
+            });
+            updateLibraryStatus();
+            logEvent('Library Enabled', {}, 'success');
+        }
+
+        // Disable library
+        function disableLibrary() {
+            map.pm.setGlobalOptions({
+                library: {
+                    enabled: false
+                }
+            });
+            updateLibraryStatus();
+            logEvent('Library Disabled', {}, 'warning');
+        }
+
+        // Toggle controls
+        function toggleControls() {
+            if (map.pm.controlsVisible()) {
+                map.pm.removeControls();
+                logEvent('Controls Removed');
+            } else {
+                map.pm.addControls({
+                    library: true
+                });
+                logEvent('Controls Added');
+            }
+        }
+
+        // Load sample JSON
+        function loadSampleJSON() {
+            map.pm.setGlobalOptions({
+                library: {
+                    enabled: true,
+                    json: sampleJSON,
+                    url: null,
+                    autoLoad: true
+                }
+            });
+            updateLibraryStatus();
+            logEvent('Sample JSON Loaded', { categories: sampleJSON.categories.length }, 'success');
+        }
+
+        // Load custom JSON
+        function loadCustomJSON() {
+            try {
+                const customJSON = JSON.parse(jsonEditor.value);
+                map.pm.setGlobalOptions({
+                    library: {
+                        enabled: true,
+                        json: customJSON,
+                        url: null,
+                        autoLoad: true
+                    }
+                });
+                updateLibraryStatus();
+                logEvent('Custom JSON Loaded', { categories: customJSON.categories ? customJSON.categories.length : 0 }, 'success');
+            } catch (error) {
+                logEvent('JSON Parse Error', { error: error.message }, 'error');
+            }
+        }
+
+        // Clear JSON
+        function clearJSON() {
+            map.pm.setGlobalOptions({
+                library: {
+                    enabled: true,
+                    json: null,
+                    url: null
+                }
+            });
+            logEvent('JSON Cleared', {}, 'warning');
+        }
+
+        // Load from URL
+        function loadFromURL() {
+            const url = urlInput.value.trim();
+            if (!url) {
+                logEvent('URL Required', {}, 'error');
+                return;
+            }
+
+            map.pm.setGlobalOptions({
+                library: {
+                    enabled: true,
+                    json: null,
+                    url: url,
+                    autoLoad: true,
+                    urlOptions: {
+                        cache: true,
+                        timeout: 10000
+                    }
+                }
+            });
+            updateLibraryStatus();
+            logEvent('URL Set for Loading', { url }, 'success');
+        }
+
+        // Clear URL
+        function clearURL() {
+            map.pm.setGlobalOptions({
+                library: {
+                    enabled: true,
+                    json: null,
+                    url: null
+                }
+            });
+            logEvent('URL Cleared', {}, 'warning');
+        }
+
+        // Smart refresh
+        async function refreshLibrary() {
+            try {
+                await map.pm.Library.refreshPanel();
+                logEvent('Library Refreshed', {}, 'success');
+            } catch (error) {
+                logEvent('Refresh Error', { error: error.message }, 'error');
+            }
+        }
+
+        // Show current options
+        function showCurrentOptions() {
+            const globalOptions = map.pm.getGlobalOptions();
+            const libraryOptions = globalOptions.library;
+            logEvent('Current Library Options', libraryOptions);
+        }
+
+        // Clear log
+        function clearLog() {
+            eventLog.innerHTML = '';
+        }
+
+        // Library event listeners
+        map.on('pm:library-categories-loaded', (e) => {
+            logEvent('Categories Loaded', {
+                source: e.source,
+                categoriesCount: e.categories ? e.categories.length : 0
+            }, 'success');
+        });
+
+        map.on('pm:library-url-loaded', (e) => {
+            logEvent('URL Loaded Successfully', {
+                url: e.url,
+                categoriesCount: e.categoriesCount,
+                totalItems: e.totalItems
+            }, 'success');
+        });
+
+        map.on('pm:library-url-error', (e) => {
+            logEvent('URL Load Error', {
+                url: e.url,
+                error: e.error
+            }, 'error');
+        });
+
+        map.on('pm:library-panel-opened', (e) => {
+            logEvent('Library Panel Opened', {}, 'success');
+        });
+
+        map.on('pm:library-panel-closed', (e) => {
+            logEvent('Library Panel Closed', {});
+        });
+
+        // Initialize
+        updateLibraryStatus();
+        logEvent('Demo Initialized', {});
+
+        // Enable library by default for testing
+        map.pm.setGlobalOptions({
+            library: {
+                enabled: true
+            }
+        });
+        updateLibraryStatus();
+
+        // Add controls initially
+        map.pm.addControls({
+            library: true
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mode Library with JSON Categories Demo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@latest/dist/leaflet.css" />
+    <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+    <link rel="stylesheet" href="../src/css/rtl.css" />
+    <link rel="stylesheet" href="demo.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .demo-controls {
+            background: #f9f9f9;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .demo-controls h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .control-group button {
+            margin-right: 10px;
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .control-group button:hover {
+            background: #45a049;
+        }
+        
+        .control-group button.secondary {
+            background: #2196F3;
+        }
+        
+        .control-group button.secondary:hover {
+            background: #1976D2;
+        }
+        
+        .control-group button.danger {
+            background: #f44336;
+        }
+        
+        .control-group button.danger:hover {
+            background: #d32f2f;
+        }
+        
+        .json-editor {
+            width: 100%;
+            height: 200px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            resize: vertical;
+        }
+        
+        .url-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .url-status {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .url-status.loaded {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .url-status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .event-log {
+            background: #f5f5f5;
+            padding: 15px;
+            height: 250px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        
+        .event-log div {
+            margin-bottom: 8px;
+            padding: 4px;
+            border-left: 3px solid #4CAF50;
+            padding-left: 8px;
+        }
+        
+        .event-log .error {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        
+        .event-log .warning {
+            border-left-color: #ff9800;
+            background: #fff3e0;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-indicator.active {
+            background: #4CAF50;
+        }
+        
+        .status-indicator.inactive {
+            background: #ccc;
+        }
+        
+        .category-preview {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .category-item {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            background: #fafafa;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <article>
+            <h1>Mode Library with JSON Categories Demo</h1>
+            <h3>
+                Comprehensive demonstration of the Leaflet-Geoman Library feature with JSON-based category management
+            </h3>
+        </article>
+
+        <article>
+            <div class="demo-controls">
+                <h3>Library Controls</h3>
+                
+                <div class="control-group">
+                    <label>Library Status:</label>
+                    <span class="status-indicator inactive" id="libraryStatus"></span>
+                    <span id="libraryStatusText">Not Initialized</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Basic Actions:</label>
+                    <button onclick="initializeLibrary()">Initialize Library</button>
+                    <button onclick="toggleLibraryPanel()" class="secondary">Toggle Panel</button>
+                    <button onclick="clearAllMarkers()" class="danger">Clear All Markers</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Load Presets:</label>
+                    <button onclick="loadVehicleCategories()">Load Vehicles</button>
+                    <button onclick="loadIconCategories()">Load Icons</button>
+                    <button onclick="loadEmergencyCategories()">Load Emergency</button>
+                    <button onclick="loadAllCategories()">Load All Categories</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Custom JSON:</label>
+                    <button onclick="loadCustomJson()" class="secondary">Load Custom JSON</button>
+                    <button onclick="validateJson()" class="secondary">Validate JSON</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>URL Loading:</label>
+                    <button onclick="loadFromUrl()" class="secondary">Load from URL</button>
+                    <button onclick="refreshFromUrl()" class="secondary">Refresh URL</button>
+                    <button onclick="clearUrl()" class="danger">Clear URL</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Translations:</label>
+                    <button onclick="testTranslations()" class="secondary">Test Translations</button>
+                    <button onclick="showLanguageInfo()" class="secondary">Language Info</button>
+                    <button onclick="simulateLanguageChange()" class="secondary">Simulate Lang Change</button>
+                </div>
+            </div>
+            
+            <h3>Custom JSON Editor</h3>
+            <textarea id="jsonEditor" class="json-editor" placeholder="Enter your custom JSON categories here..."></textarea>
+            
+            <h3>URL Loading</h3>
+            <input type="url" id="urlInput" class="url-input" placeholder="Enter JSON URL (e.g., https://example.com/categories.json)" />
+            <div class="url-status">
+                <span id="urlStatus">No URL loaded</span>
+                <button onclick="copyCurrentUrl()" class="secondary" style="margin-left: 10px; font-size: 12px;">Copy Current URL</button>
+            </div>
+            
+            <div id="categoryPreview" class="category-preview" style="display: none;">
+                <h4>Category Preview:</h4>
+                <div id="previewContent"></div>
+            </div>
+        </article>
+
+        <article>
+            <h2>Interactive Map</h2>
+            <div class="map" id="demoMap" style="height: 800px;"></div>
+        </article>
+
+        <article>
+            <h3>Event Log</h3>
+            <div id="eventLog" class="event-log"></div>
+        </article>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@latest/dist/leaflet.js"></script>
+    <script src="../dist/leaflet-geoman.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/js/all.min.js" integrity="sha512-6BTOlkauINO65nLhXhthZMtepgJSghyimIalb+crKRPhvhmsCdnIuGcVbR5/aQY2A+260iC1OPy1oCdB6pSSwQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        // Initialize map
+        const map = L.map('demoMap').setView([51.505, -0.09], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        map.pm.setLang('ar');
+        // Initialize Geoman
+        map.pm.addControls();
+
+        // Global variables
+        let library = null;
+        let addedMarkers = [];
+        
+        // DOM elements
+        const eventLog = document.getElementById('eventLog');
+        const jsonEditor = document.getElementById('jsonEditor');
+        const libraryStatus = document.getElementById('libraryStatus');
+        const libraryStatusText = document.getElementById('libraryStatusText');
+        const categoryPreview = document.getElementById('categoryPreview');
+        const previewContent = document.getElementById('previewContent');
+
+        // Event logging function
+        function logEvent(eventName, data, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            
+            let dataStr = '';
+            if (data && typeof data === 'object') {
+                try {
+                    // Create a safe copy of the data without circular references
+                    const safeData = JSON.parse(JSON.stringify(data, (key, value) => {
+                        // Skip circular references and complex objects
+                        if (key.startsWith('_') || 
+                            (typeof value === 'object' && value !== null && 
+                             (value.constructor.name === 'HTMLElement' || 
+                              value.constructor.name.length === 1 || // Leaflet classes often have single-letter names
+                              value._leaflet_id !== undefined))) {
+                            return '[Object]';
+                        }
+                        return value;
+                    }));
+                    dataStr = JSON.stringify(safeData, null, 2);
+                } catch (error) {
+                    // Fallback for objects that can't be stringified
+                    dataStr = Object.keys(data).map(key => {
+                        let value = data[key];
+                        if (typeof value === 'object' && value !== null) {
+                            value = '[Object]';
+                        }
+                        return `${key}: ${value}`;
+                    }).join(', ');
+                }
+            } else if (data) {
+                dataStr = data.toString();
+            }
+            
+            logEntry.innerHTML = `<strong>[${timestamp}] ${eventName}:</strong><br>${dataStr}`;
+            eventLog.appendChild(logEntry);
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+
+        // Update library status indicator
+        function updateLibraryStatus(isActive) {
+            if (isActive) {
+                libraryStatus.className = 'status-indicator active';
+                libraryStatusText.textContent = 'Active';
+            } else {
+                libraryStatus.className = 'status-indicator inactive';
+                libraryStatusText.textContent = 'Not Initialized';
+            }
+        }
+
+        // Library event listeners
+        map.on('pm:library-item-added', (e) => {
+            if (e.marker) {
+                addedMarkers.push(e.marker);
+            }
+            logEvent('Library Item Added', {
+                itemId: e.item ? e.item.id : 'unknown',
+                itemType: e.item ? e.item.type : 'unknown',
+                categoryId: e.item ? e.item.categoryId : 'unknown',
+                latlng: e.latlng ? `[${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}]` : 'unknown',
+                totalMarkers: addedMarkers.length
+            });
+        });
+
+        map.on('pm:library-panel-opened', (e) => {
+            logEvent('Library Panel Opened', {
+                timestamp: new Date().toISOString(),
+                panelVisible: true
+            });
+        });
+
+        map.on('pm:library-panel-closed', (e) => {
+            logEvent('Library Panel Closed', {
+                timestamp: new Date().toISOString(),
+                panelVisible: false
+            });
+        });
+
+        map.on('pm:library-categories-loaded', (e) => {
+            logEvent('Categories Loaded', {
+                categoriesCount: e.categories ? e.categories.length : 0,
+                source: e.source || 'unknown',
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Initialize library
+        function initializeLibrary() {
+            try {
+                if (map.pm.Library) {
+                    library = map.pm.Library;
+                    updateLibraryStatus(true);
+                    logEvent('Library Initialized', { success: true });
+                } else {
+                    // Manual initialization fallback
+                    library = new L.PM.Library(map);
+                    updateLibraryStatus(true);
+                    logEvent('Library Manually Initialized', { success: true });
+                }
+            } catch (error) {
+                updateLibraryStatus(false);
+                logEvent('Library Initialization Failed', { error: error.message }, 'error');
+            }
+        }
+
+        // Toggle library panel
+        function toggleLibraryPanel() {
+            if (!library) {
+                logEvent('Library Not Available', { action: 'toggle panel' }, 'warning');
+                return;
+            }
+            
+            try {
+                library.togglePanel();
+                logEvent('Panel Toggle Requested', {});
+            } catch (error) {
+                logEvent('Panel Toggle Failed', { error: error.message }, 'error');
+            }
+        }
+
+        // Clear all markers
+        function clearAllMarkers() {
+            addedMarkers.forEach(marker => {
+                if (marker && map.hasLayer(marker)) {
+                    map.removeLayer(marker);
+                }
+            });
+            addedMarkers = [];
+            logEvent('All Markers Cleared', { count: addedMarkers.length });
+        }
+
+        // Predefined category sets
+        const vehicleCategories = {
+            categories: [
+                {
+                    id: 'vehicles',
+                    title: 'Vehicles',
+                    items: [
+                        {
+                            id: 'car-red',
+                            type: 'image',
+                            src: 'https://cdn-icons-png.flaticon.com/32/3774/3774299.png',
+                            width: 32,
+                            height: 32,
+                            title: 'Red Car'
+                        },
+                        {
+                            id: 'truck-blue',
+                            type: 'image',
+                            src: 'https://cdn-icons-png.flaticon.com/32/1085/1085003.png',
+                            width: 32,
+                            height: 32,
+                            title: 'Blue Truck'
+                        },
+                        {
+                            id: 'bus-green',
+                            type: 'image',
+                            src: 'https://cdn-icons-png.flaticon.com/32/1085/1085012.png',
+                            width: 32,
+                            height: 32,
+                            title: 'Green Bus'
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const iconCategories = {
+            categories: [
+                {
+                    id: 'icons',
+                    title: 'Font Icons',
+                    items: [
+                        {
+                            id: 'star-yellow',
+                            type: 'font',
+                            icon: 'fa fa-star',
+                            color: '#FFD700',
+                            title: 'Yellow Star'
+                        },
+                        {
+                            id: 'heart-red',
+                            type: 'font',
+                            icon: 'fa fa-heart',
+                            color: '#FF0000',
+                            title: 'Red Heart'
+                        },
+                        {
+                            id: 'home-blue',
+                            type: 'font',
+                            icon: 'fa fa-home',
+                            color: '#0066CC',
+                            title: 'Blue Home'
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const emergencyCategories = {
+            categories: [
+                {
+                    id: 'emergency',
+                    title: 'Emergency Services',
+                    items: [
+                        {
+                            id: 'fire-station',
+                            type: 'image',
+                            src: 'https://cdn-icons-png.flaticon.com/32/2917/2917995.png',
+                            width: 32,
+                            height: 32,
+                            title: 'Fire Station'
+                        },
+                        {
+                            id: 'hospital',
+                            type: 'image',
+                            src: 'https://cdn-icons-png.flaticon.com/32/2917/2917816.png',
+                            width: 32,
+                            height: 32,
+                            title: 'Hospital'
+                        },
+                        {
+                            id: 'police',
+                            type: 'image',
+                            src: 'https://cdn-icons-png.flaticon.com/32/2917/2917822.png',
+                            width: 32,
+                            height: 32,
+                            title: 'Police Station'
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Load predefined categories
+        function loadVehicleCategories() {
+            loadCategories(vehicleCategories, 'Vehicle Categories');
+        }
+
+        function loadIconCategories() {
+            loadCategories(iconCategories, 'Icon Categories');
+        }
+
+        function loadEmergencyCategories() {
+            loadCategories(emergencyCategories, 'Emergency Categories');
+        }
+
+        function loadAllCategories() {
+            const allCategories = {
+                categories: [
+                    ...vehicleCategories.categories,
+                    ...iconCategories.categories,
+                    ...emergencyCategories.categories
+                ]
+            };
+            loadCategories(allCategories, 'All Categories');
+        }
+
+        // Generic category loader
+        function loadCategories(categoriesData, source) {
+            if (!library) {
+                logEvent('Library Not Available', { action: 'load categories', source }, 'warning');
+                return;
+            }
+
+            try {
+                const success = library.loadCategoriesJson(categoriesData);
+                if (success) {
+                    logEvent('Categories Loaded Successfully', {
+                        source,
+                        categoriesCount: categoriesData.categories.length,
+                        totalItems: categoriesData.categories.reduce((sum, cat) => sum + cat.items.length, 0)
+                    });
+                    updateCategoryPreview(categoriesData);
+                } else {
+                    logEvent('Failed to Load Categories', { source }, 'error');
+                }
+            } catch (error) {
+                logEvent('Category Loading Error', { source, error: error.message }, 'error');
+            }
+        }
+
+        // Load custom JSON
+        function loadCustomJson() {
+            const jsonText = jsonEditor.value.trim();
+            if (!jsonText) {
+                logEvent('No JSON Provided', { action: 'load custom' }, 'warning');
+                return;
+            }
+
+            try {
+                const categoriesData = JSON.parse(jsonText);
+                loadCategories(categoriesData, 'Custom JSON');
+            } catch (error) {
+                logEvent('Invalid JSON Format', { error: error.message }, 'error');
+            }
+        }
+
+        // Validate JSON
+        function validateJson() {
+            const jsonText = jsonEditor.value.trim();
+            if (!jsonText) {
+                logEvent('No JSON to Validate', {}, 'warning');
+                return;
+            }
+
+            try {
+                const data = JSON.parse(jsonText);
+                
+                // Basic validation
+                const errors = [];
+                if (!data.categories || !Array.isArray(data.categories)) {
+                    errors.push('Missing or invalid "categories" array');
+                }
+                
+                if (data.categories) {
+                    data.categories.forEach((cat, catIndex) => {
+                        if (!cat.id) errors.push(`Category ${catIndex}: missing "id"`);
+                        if (!cat.title) errors.push(`Category ${catIndex}: missing "title"`);
+                        if (!cat.items || !Array.isArray(cat.items)) {
+                            errors.push(`Category ${catIndex}: missing or invalid "items" array`);
+                        } else {
+                            cat.items.forEach((item, itemIndex) => {
+                                if (!item.id) errors.push(`Category ${catIndex}, Item ${itemIndex}: missing "id"`);
+                                if (!item.type) errors.push(`Category ${catIndex}, Item ${itemIndex}: missing "type"`);
+                            });
+                        }
+                    });
+                }
+
+                if (errors.length === 0) {
+                    logEvent('JSON Validation Passed', {
+                        categoriesCount: data.categories.length,
+                        totalItems: data.categories.reduce((sum, cat) => sum + (cat.items ? cat.items.length : 0), 0)
+                    });
+                    updateCategoryPreview(data);
+                } else {
+                    logEvent('JSON Validation Failed', { errors }, 'error');
+                }
+            } catch (error) {
+                logEvent('JSON Parse Error', { error: error.message }, 'error');
+            }
+        }
+
+        // Update category preview
+        function updateCategoryPreview(data) {
+            if (!data || !data.categories) {
+                categoryPreview.style.display = 'none';
+                return;
+            }
+
+            let previewHtml = '';
+            data.categories.forEach(category => {
+                previewHtml += `<h5>${category.title} (${category.items.length} items)</h5>`;
+                category.items.forEach(item => {
+                    previewHtml += `<div class="category-item">
+                        <strong>${item.id}</strong><br>
+                        Type: ${item.type}<br>
+                        ${item.title ? `Title: ${item.title}<br>` : ''}
+                        ${item.src ? `Source: ${item.src}<br>` : ''}
+                        ${item.icon ? `Icon: ${item.icon}<br>` : ''}
+                        ${item.color ? `Color: ${item.color}` : ''}
+                    </div>`;
+                });
+            });
+
+            previewContent.innerHTML = previewHtml;
+            categoryPreview.style.display = 'block';
+        }
+
+        // Set default JSON in editor
+        jsonEditor.value = JSON.stringify({
+            categories: [
+                {
+                    id: 'custom',
+                    title: 'Custom Category',
+                    items: [
+                        {
+                            id: 'custom-marker',
+                            type: 'image',
+                            src: 'https://cdn-icons-png.flaticon.com/32/684/684908.png',
+                            width: 32,
+                            height: 32,
+                            title: 'Custom Marker'
+                        }
+                    ]
+                }
+            ]
+        }, null, 2);
+
+        // URL loading functions
+        async function loadFromUrl() {
+            const urlInput = document.getElementById('urlInput');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                logEvent('No URL Provided', { action: 'load from URL' }, 'warning');
+                return;
+            }
+            
+            if (!library) {
+                logEvent('Library Not Available', { action: 'load from URL' }, 'warning');
+                return;
+            }
+            
+            try {
+                updateUrlStatus('Loading...', 'loading');
+                const success = await library.loadCategoriesJsonFromUrl(url);
+                
+                if (success) {
+                    updateUrlStatus(`Loaded: ${url}`, 'loaded');
+                    logEvent('Categories Loaded from URL', { url, success: true });
+                } else {
+                    updateUrlStatus('Failed to load URL', 'error');
+                    logEvent('Failed to Load from URL', { url }, 'error');
+                }
+            } catch (error) {
+                updateUrlStatus('Error loading URL', 'error');
+                logEvent('URL Loading Error', { url, error: error.message }, 'error');
+            }
+        }
+        
+        async function refreshFromUrl() {
+            if (!library) {
+                logEvent('Library Not Available', { action: 'refresh from URL' }, 'warning');
+                return;
+            }
+            
+            const cachedUrl = library.getCachedUrl();
+            if (!cachedUrl) {
+                logEvent('No Cached URL', { action: 'refresh' }, 'warning');
+                return;
+            }
+            
+            try {
+                updateUrlStatus('Refreshing...', 'loading');
+                const success = await library.refreshCategoriesFromUrl();
+                
+                if (success) {
+                    updateUrlStatus(`Refreshed: ${cachedUrl}`, 'loaded');
+                    logEvent('Categories Refreshed from URL', { url: cachedUrl, success: true });
+                } else {
+                    updateUrlStatus('Failed to refresh', 'error');
+                    logEvent('Failed to Refresh URL', { url: cachedUrl }, 'error');
+                }
+            } catch (error) {
+                updateUrlStatus('Error refreshing', 'error');
+                logEvent('URL Refresh Error', { error: error.message }, 'error');
+            }
+        }
+        
+        function clearUrl() {
+            if (!library) {
+                logEvent('Library Not Available', { action: 'clear URL' }, 'warning');
+                return;
+            }
+            
+            library.clearCachedUrl();
+            document.getElementById('urlInput').value = '';
+            updateUrlStatus('No URL loaded', '');
+            logEvent('Cached URL Cleared', {});
+        }
+        
+        function copyCurrentUrl() {
+            if (!library) {
+                return;
+            }
+            
+            const cachedUrl = library.getCachedUrl();
+            if (cachedUrl) {
+                navigator.clipboard.writeText(cachedUrl).then(() => {
+                    logEvent('URL Copied to Clipboard', { url: cachedUrl });
+                }).catch(() => {
+                    logEvent('Failed to Copy URL', {}, 'error');
+                });
+            }
+        }
+        
+        function updateUrlStatus(message, type) {
+            const statusElement = document.getElementById('urlStatus');
+            statusElement.textContent = message;
+            statusElement.parentElement.className = `url-status ${type}`;
+        }
+
+        // Additional event listeners for URL loading
+        map.on('pm:library-url-loading-started', (e) => {
+            logEvent('URL Loading Started', {
+                url: e.url,
+                timestamp: e.timestamp
+            });
+        });
+
+        map.on('pm:library-url-loaded', (e) => {
+            logEvent('URL Loaded Successfully', {
+                url: e.url,
+                categoriesCount: e.categoriesCount,
+                totalItems: e.totalItems,
+                timestamp: e.timestamp
+            });
+        });
+
+        map.on('pm:library-url-error', (e) => {
+            logEvent('URL Loading Error', {
+                url: e.url,
+                error: e.error,
+                timestamp: e.timestamp
+            }, 'error');
+        });
+
+        map.on('pm:library-url-refresh-started', (e) => {
+            logEvent('URL Refresh Started', {
+                url: e.url,
+                timestamp: e.timestamp
+            });
+        });
+
+        map.on('pm:library-url-refreshed', (e) => {
+            logEvent('URL Refreshed Successfully', {
+                url: e.url,
+                timestamp: e.timestamp
+            });
+        });
+
+        map.on('pm:library-language-changed', (e) => {
+            logEvent('Library Language Changed', {
+                language: e.language,
+                supported: e.supported,
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Translation test functions
+        function testTranslations() {
+            if (!library) {
+                logEvent('Library Not Available', { action: 'test translations' }, 'warning');
+                return;
+            }
+            
+            // Test various translation keys
+            const tests = [
+                'library.title',
+                'library.url.loadFromUrl',
+                'library.url.loaded',
+                'library.url.connectionTimeout'
+            ];
+            
+            tests.forEach(key => {
+                const translation = library._t(key, { url: 'test.json', timeout: 5000 });
+                logEvent('Translation Test', { key, translation });
+            });
+        }
+        
+        function showLanguageInfo() {
+            if (!library) {
+                logEvent('Library Not Available', { action: 'show language info' }, 'warning');
+                return;
+            }
+            
+            const globalLang = L.PM.activeLang;
+            const libraryLang = library.getCurrentLanguage();
+            const availableLanguages = library.getAvailableLanguages();
+            const isSupported = library.isLanguageSupported(globalLang);
+            
+            logEvent('Language Information', { 
+                globalLang,
+                libraryLang,
+                availableLanguages,
+                isSupported,
+                total: availableLanguages.length 
+            });
+        }
+        
+        function simulateLanguageChange() {
+            // Simulate changing the global language
+            const currentLang = L.PM.activeLang || 'en';
+            let newLang;
+            
+            // Cycle through all available languages: en -> es -> fr -> ar -> en
+            if (currentLang === 'en') {
+                newLang = 'es';
+            } else if (currentLang === 'es') {
+                newLang = 'fr';
+            } else if (currentLang === 'fr') {
+                newLang = 'ar';
+            } else {
+                newLang = 'en';
+            }
+            
+            logEvent('Simulating Language Change', { 
+                from: currentLang, 
+                to: newLang,
+                note: 'This would normally be done via map.pm.setLang() in real usage'
+            });
+            
+            // In a real application, you would use: map.pm.setLang(newLang)
+            // For demo purposes, we'll just change L.PM.activeLang directly
+            L.PM.activeLang = newLang;
+            
+            // Test multiple translations after change
+            setTimeout(() => {
+                if (library) {
+                    const translations = {
+                        title: library._t('library.title'),
+                        loadFromUrl: library._t('library.url.loadFromUrl'),
+                        done: library._t('library.done'),
+                        loading: library._t('library.loading'),
+                        search: library._t('library.search'),
+                        refresh: library._t('library.refresh')
+                    };
+                    
+                    logEvent('Translations After Language Change', {
+                        newLang,
+                        translations,
+                        supported: library.isLanguageSupported(newLang)
+                    });
+                }
+            }, 100);
+        }
+
+        // Set example URL to local test file
+        document.getElementById('urlInput').value = './test-categories.json';
+
+        // Auto-initialize library on page load
+        setTimeout(() => {
+            initializeLibrary();
+            logEvent('Demo Page Loaded', { timestamp: new Date().toISOString() });
+        }, 1000);
+    </script>
+</body>
+</html>

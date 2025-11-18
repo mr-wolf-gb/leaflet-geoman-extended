@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet-Geoman - Complete Interactive Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@latest/dist/leaflet.css" />
+    <link rel="stylesheet" href="../dist/leaflet-geoman.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 { 
+            font-size: 2.5rem; 
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .header p { 
+            font-size: 1.1rem; 
+            opacity: 0.95;
+        }
+        
+        /* Container */
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 0 1rem; 
+        }
+        
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            .sidebar, .info-panel { display: none; }
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 1.5rem;
+        }
+        
+        .sidebar h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .feature-list {
+            list-style: none;
+        }
+        
+        .feature-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #f7fafc;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .feature-item:hover {
+            background: #edf2f7;
+            border-left-color: #667eea;
+            transform: translateX(2px);
+        }
+        
+        .feature-item.active {
+            background: #e6f2ff;
+            border-left-color: #667eea;
+            font-weight: 500;
+        }
+        
+        .feature-icon {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+        
+        /* Map Container */
+        .map-section {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .map-header {
+            background: #f7fafc;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .map-header h2 {
+            font-size: 1.3rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+        
+        /* Info Panel */
+        .info-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 1.5rem;
+        }
+        
+        .info-panel h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .info-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .info-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .info-section h4 {
+            font-size: 0.9rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .info-section p {
+            color: #4a5568;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        
+        .shortcut-list {
+            list-style: none;
+        }
+        
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .shortcut-key {
+            background: #edf2f7;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .event-log {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .event-log-item {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #2d3748;
+        }
+        
+        .event-log-item:last-child {
+            border-bottom: none;
+        }
+        
+        .event-time {
+            color: #a0aec0;
+            margin-right: 0.5rem;
+        }
+        
+        .event-type {
+            color: #48bb78;
+            font-weight: 600;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            background: #f7fafc;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #718096;
+        }
+        
+        .btn-secondary:hover {
+            background: #4a5568;
+        }
+        
+        .btn-danger {
+            background: #f56565;
+        }
+        
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+        
+        .actions {
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>🗺️ Leaflet-Geoman Complete Demo</h1>
+            <p>Explore all features in one comprehensive interactive demonstration</p>
+        </div>
+    </div>
+
+
+    <div class="container">
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <h2>Features</h2>
+                <ul class="feature-list">
+                    <li class="feature-item active" data-feature="all">
+                        <span class="feature-icon">🎯</span> All Features
+                    </li>
+                    <li class="feature-item" data-feature="drawing">
+                        <span class="feature-icon">✏️</span> Drawing Tools
+                    </li>
+                    <li class="feature-item" data-feature="editing">
+                        <span class="feature-icon">🔧</span> Editing Tools
+                    </li>
+                    <li class="feature-item" data-feature="measurements">
+                        <span class="feature-icon">📏</span> Measurements
+                    </li>
+                    <li class="feature-item" data-feature="advanced">
+                        <span class="feature-icon">⚡</span> Advanced Features
+                    </li>
+                    <li class="feature-item" data-feature="keyboard">
+                        <span class="feature-icon">⌨️</span> Keyboard Shortcuts
+                    </li>
+                    <li class="feature-item" data-feature="events">
+                        <span class="feature-icon">📡</span> Events & API
+                    </li>
+                    <li class="feature-item" data-feature="library">
+                        <span class="feature-icon">📚</span> Library Mode
+                    </li>
+                    <li class="feature-item" data-feature="rtl">
+                        <span class="feature-icon">🌐</span> RTL Support
+                    </li>
+                    <li class="feature-item" data-feature="geojson">
+                        <span class="feature-icon">💾</span> GeoJSON Import/Export
+                    </li>
+                </ul>
+            </div>
+
+
+            <!-- Map Section -->
+            <div class="map-section">
+                <div class="map-header">
+                    <h2 id="current-feature">All Features Enabled</h2>
+                </div>
+                <div id="map"></div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="info-panel">
+                <h3>Information</h3>
+                
+                <div class="info-section">
+                    <h4>Statistics</h4>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="shape-count">0</div>
+                            <div class="stat-label">Shapes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="event-count">0</div>
+                            <div class="stat-label">Events</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h4>Keyboard Shortcuts</h4>
+                    <ul class="shortcut-list">
+                        <li class="shortcut-item">
+                            <span>Finish Drawing</span>
+                            <span class="shortcut-key">ESC</span>
+                        </li>
+                        <li class="shortcut-item">
+                            <span>Remove Vertex</span>
+                            <span class="shortcut-key">BACKSPACE</span>
+                        </li>
+                        <li class="shortcut-item">
+                            <span>Undo Vertex</span>
+                            <span class="shortcut-key">CTRL+Z</span>
+                        </li>
+                    </ul>
+                </div>
+
+
+                <div class="info-section">
+                    <h4>Current Feature</h4>
+                    <p id="feature-description">All drawing and editing tools are enabled. Use the toolbar on the left to create shapes, or click on existing shapes to edit them.</p>
+                </div>
+
+                <div class="info-section">
+                    <h4>Quick Actions</h4>
+                    <div class="actions">
+                        <button class="btn" onclick="enableAllTools()">Enable All</button>
+                        <button class="btn btn-secondary" onclick="clearMap()">Clear Map</button>
+                        <button class="btn btn-secondary" onclick="addSampleShapes()">Add Samples</button>
+                        <button class="btn btn-secondary" onclick="toggleRTL()">Toggle RTL</button>
+                        <button class="btn btn-secondary" onclick="toggleLibrary()">Toggle Library</button>
+                        <button class="btn btn-danger" onclick="clearEventLog()">Clear Log</button>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h4>GeoJSON Import/Export</h4>
+                    <div class="actions">
+                        <button class="btn" onclick="exportGeoJSON()">Export</button>
+                        <button class="btn" onclick="importGeoJSON()">Import</button>
+                        <button class="btn btn-secondary" onclick="saveToFile()">Save File</button>
+                        <button class="btn btn-secondary" onclick="loadFromFile()">Load File</button>
+                    </div>
+                    <textarea id="geojson-data" style="width: 100%; height: 120px; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 0.75rem; resize: vertical;" placeholder="GeoJSON will appear here..."></textarea>
+                    <input type="file" id="file-input" accept=".geojson,.json" style="display: none;" onchange="handleFileLoad(event)">
+                </div>
+                    <div style="margin-top: 1rem;">
+                        <label for="language-select" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #4a5568; font-weight: 500;">Language:</label>
+                        <select id="language-select" onchange="changeLanguage(this.value)" style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.9rem; background: white; cursor: pointer;">
+                            <option value="en">English</option>
+                            <option value="ar">العربية (Arabic)</option>
+                            <option value="cz">Čeština (Czech)</option>
+                            <option value="da">Dansk (Danish)</option>
+                            <option value="de">Deutsch (German)</option>
+                            <option value="el">Ελληνικά (Greek)</option>
+                            <option value="es">Español (Spanish)</option>
+                            <option value="fa">فارسی (Persian)</option>
+                            <option value="fi">Suomi (Finnish)</option>
+                            <option value="fr">Français (French)</option>
+                            <option value="hu">Magyar (Hungarian)</option>
+                            <option value="id">Bahasa Indonesia (Indonesian)</option>
+                            <option value="it">Italiano (Italian)</option>
+                            <option value="ja">日本語 (Japanese)</option>
+                            <option value="ko">한국어 (Korean)</option>
+                            <option value="ky">Кыргызча (Kyrgyz)</option>
+                            <option value="nl">Nederlands (Dutch)</option>
+                            <option value="no">Norsk (Norwegian)</option>
+                            <option value="pl">Polski (Polish)</option>
+                            <option value="pt_br">Português (Brasil)</option>
+                            <option value="pt_pt">Português (Portugal)</option>
+                            <option value="ro">Română (Romanian)</option>
+                            <option value="ru">Русский (Russian)</option>
+                            <option value="sv">Svenska (Swedish)</option>
+                            <option value="tr">Türkçe (Turkish)</option>
+                            <option value="ua">Українська (Ukrainian)</option>
+                            <option value="zh">中文 (Chinese Simplified)</option>
+                            <option value="zh_tw">中文 (Chinese Traditional)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h4>Event Log</h4>
+                    <div class="event-log" id="event-log">
+                        <div class="event-log-item">
+                            <span class="event-time">Ready</span>
+                            <span class="event-type">System initialized</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@latest/dist/leaflet.js"></script>
+    <script src="../dist/leaflet-geoman.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/js/all.min.js" integrity="sha512-6BTOlkauINO65nLhXhthZMtepgJSghyimIalb+crKRPhvhmsCdnIuGcVbR5/aQY2A+260iC1OPy1oCdB6pSSwQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        // Initialize map
+        const map = L.map('map', {
+            zoomControl: false,
+        }).setView([51.505, -0.09], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Statistics
+        let shapeCount = 0;
+        let eventCount = 0;
+
+        // Add all Leaflet-Geoman controls
+        function enableAllTools() {
+            map.pm.addControls({
+                position: 'topleft',
+                drawPolygon: true,
+                drawPolyline: true,
+                drawCircle: true,
+                drawRectangle: true,
+                drawMarker: true,
+                drawCircleMarker: true,
+                drawText: true,
+                drawArrow: true,
+                drawFreehand: true,
+                drawDistanceLine: true,
+                drawDangerousGoodsZones: true,
+                drawCircle2Points: true,
+                drawCircle3Points: true,
+                cutPolygon: true,
+                editMode: true,
+                dragMode: true,
+                removalMode: true,
+                rotateMode: true,
+                scaleMode: true,
+                copyLayerMode: true,
+                styleEditor: true,
+                library: true
+            });
+        }
+
+
+        // Sample library data
+        const sampleLibraryData = {
+            "categories": [
+                {
+                    "id": "emergency",
+                    "title": "Emergency Services",
+                    "items": [
+                        {
+                            "id": "hospital",
+                            "type": "font",
+                            "icon": "fa fa-hospital",
+                            "color": "#ff0000",
+                            "title": "Hospital"
+                        },
+                        {
+                            "id": "fire-station",
+                            "type": "font",
+                            "icon": "fa fa-fire-extinguisher",
+                            "color": "#ff4444",
+                            "title": "Fire Station"
+                        },
+                        {
+                            "id": "police",
+                            "type": "font",
+                            "icon": "fa fa-shield",
+                            "color": "#0066cc",
+                            "title": "Police Station"
+                        }
+                    ]
+                },
+                {
+                    "id": "transport",
+                    "title": "Transportation",
+                    "items": [
+                        {
+                            "id": "bus-stop",
+                            "type": "font",
+                            "icon": "fa fa-bus",
+                            "color": "#0066cc",
+                            "title": "Bus Stop"
+                        },
+                        {
+                            "id": "train-station",
+                            "type": "font",
+                            "icon": "fa fa-train",
+                            "color": "#006600",
+                            "title": "Train Station"
+                        },
+                        {
+                            "id": "airport",
+                            "type": "font",
+                            "icon": "fa fa-plane",
+                            "color": "#4169e1",
+                            "title": "Airport"
+                        }
+                    ]
+                },
+                {
+                    "id": "amenities",
+                    "title": "Amenities",
+                    "items": [
+                        {
+                            "id": "restaurant",
+                            "type": "font",
+                            "icon": "fa fa-utensils",
+                            "color": "#ff8c00",
+                            "title": "Restaurant"
+                        },
+                        {
+                            "id": "hotel",
+                            "type": "font",
+                            "icon": "fa fa-hotel",
+                            "color": "#8b4513",
+                            "title": "Hotel"
+                        },
+                        {
+                            "id": "shopping",
+                            "type": "font",
+                            "icon": "fa fa-shopping-cart",
+                            "color": "#ff1493",
+                            "title": "Shopping"
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Configure global options
+        map.pm.setGlobalOptions({
+            pathOptions: {
+                color: '#3388ff',
+                weight: 3,
+                opacity: 0.8,
+                fillColor: '#3388ff',
+                fillOpacity: 0.2,
+            },
+            measurements: {
+                measurement: true,
+                showSegmentLength: true,
+                displayFormat: 'metric',
+                precision: 2,
+            },
+            snappable: true,
+            snapDistance: 20,
+            library: {
+                enabled: true,
+                json: sampleLibraryData,
+                panelPosition: 'topright',
+                autoLoad: true
+            }
+        });
+
+        // Initialize with all tools
+        enableAllTools();
+
+        // Event logging
+        function logEvent(type, details = '') {
+            eventCount++;
+            document.getElementById('event-count').textContent = eventCount;
+            
+            const log = document.getElementById('event-log');
+            const time = new Date().toLocaleTimeString();
+            const item = document.createElement('div');
+            item.className = 'event-log-item';
+            item.innerHTML = `<span class="event-time">${time}</span> <span class="event-type">${type}</span> ${details}`;
+            log.insertBefore(item, log.firstChild);
+            
+            // Keep only last 20 events
+            while (log.children.length > 20) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+
+        // Update shape count
+        function updateShapeCount() {
+            shapeCount = map.pm.getGeomanLayers().length;
+            document.getElementById('shape-count').textContent = shapeCount;
+        }
+
+        // Event handlers
+        map.on('pm:create', (e) => {
+            logEvent('pm:create', `Created ${e.shape}`);
+            updateShapeCount();
+            
+            // Add popup to new shape
+            if (e.layer.bindPopup) {
+                e.layer.bindPopup(`${e.shape} created!`);
+            }
+        });
+
+        map.on('pm:edit', (e) => {
+            logEvent('pm:edit', 'Shape edited');
+        });
+
+        map.on('pm:remove', (e) => {
+            logEvent('pm:remove', 'Shape removed');
+            updateShapeCount();
+        });
+
+        map.on('pm:cut', (e) => {
+            logEvent('pm:cut', 'Shape cut');
+            updateShapeCount();
+        });
+
+        map.on('pm:drawstart', (e) => {
+            logEvent('pm:drawstart', `Started drawing ${e.shape}`);
+        });
+
+        map.on('pm:drawend', (e) => {
+            logEvent('pm:drawend', `Finished drawing ${e.shape}`);
+        });
+
+
+        map.on('pm:globaleditmodetoggled', (e) => {
+            logEvent('pm:globaleditmodetoggled', e.enabled ? 'Enabled' : 'Disabled');
+        });
+
+        map.on('pm:globaldragmodetoggled', (e) => {
+            logEvent('pm:globaldragmodetoggled', e.enabled ? 'Enabled' : 'Disabled');
+        });
+
+        map.on('pm:globalremovalmodetoggled', (e) => {
+            logEvent('pm:globalremovalmodetoggled', e.enabled ? 'Enabled' : 'Disabled');
+        });
+
+        map.on('pm:globalrotatemodetoggled', (e) => {
+            logEvent('pm:globalrotatemodetoggled', e.enabled ? 'Enabled' : 'Disabled');
+        });
+
+        // Add sample shapes
+        function addSampleShapes() {
+            // Sample polygon
+            const polygon = L.polygon([
+                [51.509, -0.08],
+                [51.503, -0.06],
+                [51.51, -0.047]
+            ]).addTo(map);
+            polygon.bindPopup('Sample Polygon');
+
+            // Sample line
+            const polyline = L.polyline([
+                [51.5, -0.1],
+                [51.495, -0.083],
+                [51.49, -0.075]
+            ]).addTo(map);
+            polyline.bindPopup('Sample Line');
+
+            // Sample circle
+            const circle = L.circle([51.508, -0.11], { radius: 200 }).addTo(map);
+            circle.bindPopup('Sample Circle');
+
+
+            // Sample rectangle
+            const rectangle = L.rectangle([
+                [51.515, -0.12],
+                [51.52, -0.11]
+            ]).addTo(map);
+            rectangle.bindPopup('Sample Rectangle');
+
+            // Sample marker
+            const marker = L.marker([51.515, -0.1]).addTo(map);
+            marker.bindPopup('Sample Marker');
+
+            updateShapeCount();
+            logEvent('System', 'Added sample shapes');
+        }
+
+        // Clear map
+        function clearMap() {
+            map.pm.getGeomanLayers().forEach(layer => {
+                layer.remove();
+            });
+            updateShapeCount();
+            logEvent('System', 'Cleared all shapes');
+        }
+
+        // Clear event log
+        function clearEventLog() {
+            const log = document.getElementById('event-log');
+            log.innerHTML = '<div class="event-log-item"><span class="event-time">Ready</span> <span class="event-type">Log cleared</span></div>';
+            eventCount = 0;
+            document.getElementById('event-count').textContent = eventCount;
+        }
+
+
+        // Feature descriptions
+        const featureDescriptions = {
+            all: 'All drawing and editing tools are enabled. Use the toolbar on the left to create shapes, or click on existing shapes to edit them.',
+            drawing: 'Drawing tools allow you to create various geometric shapes: polygons, lines, circles, rectangles, markers, and more. Click a tool and start drawing on the map.',
+            editing: 'Editing tools let you modify existing shapes. Enable edit mode to drag vertices, rotate shapes, scale them, or use drag mode to move entire shapes.',
+            measurements: 'Real-time measurements show area, perimeter, and distance for all shapes. Measurements update automatically as you edit shapes.',
+            advanced: 'Advanced features include cut mode (split shapes), distance lines (predefined segments), dangerous goods zones (multi-circle hazards), and freehand drawing.',
+            keyboard: 'Keyboard shortcuts speed up your workflow: ESC to finish drawing, BACKSPACE to remove last vertex, CTRL+Z to undo, ENTER to complete shapes.',
+            events: 'The event system lets you respond to user actions. Check the event log below to see all events fired as you interact with the map.',
+            library: 'Library mode provides a panel with pre-configured markers and shapes. Load categories from JSON or URL, then click items to place them on the map. Perfect for standardized icon sets.',
+            rtl: 'RTL (Right-to-Left) support enables proper text direction for languages like Arabic, Hebrew, Persian, and Urdu. Toggle RTL mode to see the interface adapt automatically.',
+            geojson: 'Export all your map layers as GeoJSON for saving, sharing, or backend integration. Import GeoJSON to restore maps with complete fidelity - all layer types, styles, and properties are preserved. Supports circles, text markers, distance lines, library items, and dangerous goods zones.'
+        };
+
+        // Feature switching
+        document.querySelectorAll('.feature-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Update active state
+                document.querySelectorAll('.feature-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                const feature = this.dataset.feature;
+                const title = this.textContent.trim();
+                
+                // Update header and description
+                document.getElementById('current-feature').textContent = title;
+                document.getElementById('feature-description').textContent = featureDescriptions[feature];
+                
+                logEvent('System', `Switched to ${title}`);
+            });
+        });
+
+
+        // Toggle RTL mode
+        let isRTLEnabled = false;
+        function toggleRTL() {
+            isRTLEnabled = !isRTLEnabled;
+            map.pm.setRTL(isRTLEnabled);
+            logEvent('System', `RTL mode ${isRTLEnabled ? 'enabled' : 'disabled'}`);
+        }
+
+        // Toggle Library
+        function toggleLibrary() {
+            if (map.pm.Library && map.pm.Library.togglePanel) {
+                map.pm.Library.togglePanel();
+                logEvent('System', 'Library panel toggled');
+            }
+        }
+
+        // Change Language
+        function changeLanguage(lang) {
+            map.pm.setLang(lang);
+            logEvent('System', `Language changed to: ${lang}`);
+        }
+
+        // Library event listeners
+        map.on('pm:library-categories-loaded', (e) => {
+            logEvent('Library', `Categories loaded: ${e.categories ? e.categories.length : 0} categories`);
+        });
+
+        map.on('pm:library-panel-opened', () => {
+            logEvent('Library', 'Panel opened');
+        });
+
+        map.on('pm:library-panel-closed', () => {
+            logEvent('Library', 'Panel closed');
+        });
+
+        map.on('pm:langchange', (e) => {
+            logEvent('System', `Language changed - RTL: ${e.rtl}, Lang: ${e.activeLang}`);
+        });
+
+        // GeoJSON Export/Import Functions
+        function exportGeoJSON() {
+            try {
+                const geojson = map.pm.exportGeoJSON({ onlyDrawn: false });
+                const textarea = document.getElementById('geojson-data');
+                textarea.value = JSON.stringify(geojson, null, 2);
+                
+                // Count different layer types
+                const markerCount = geojson.features.filter(f => 
+                    f.geometry.type === 'Point' && 
+                    (f.properties._layerType === 'Marker' || f.properties._layerType === 'LibraryItem')
+                ).length;
+                
+                logEvent('Export', `Exported ${geojson.features.length} features (${markerCount} markers)`);
+            } catch (error) {
+                logEvent('Error', `Export failed: ${error.message}`);
+                alert('Export failed: ' + error.message);
+            }
+        }
+
+        function importGeoJSON() {
+            try {
+                const textarea = document.getElementById('geojson-data');
+                const geojsonText = textarea.value.trim();
+                
+                if (!geojsonText) {
+                    alert('Please paste GeoJSON data first or export some shapes');
+                    return;
+                }
+
+                const geojson = JSON.parse(geojsonText);
+                const layers = map.pm.importGeoJSON(geojson, {
+                    clearExisting: false,
+                    markAsDrawn: true
+                });
+
+                // Count different layer types
+                const markerCount = layers.filter(l => l instanceof L.Marker).length;
+                const circleCount = layers.filter(l => l instanceof L.Circle).length;
+                
+                logEvent('Import', `Imported ${layers.length} layers (${markerCount} markers, ${circleCount} circles)`);
+                updateShapeCount();
+                
+                // Fit map to imported layers
+                if (layers.length > 0) {
+                    const group = L.featureGroup(layers);
+                    map.fitBounds(group.getBounds(), { padding: [50, 50] });
+                }
+            } catch (error) {
+                logEvent('Error', `Import failed: ${error.message}`);
+                alert('Import failed: ' + error.message);
+            }
+        }
+
+        function saveToFile() {
+            try {
+                const textarea = document.getElementById('geojson-data');
+                const geojsonText = textarea.value.trim();
+                
+                if (!geojsonText) {
+                    alert('Please export first');
+                    return;
+                }
+
+                const blob = new Blob([geojsonText], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `map-${Date.now()}.geojson`;
+                link.click();
+                URL.revokeObjectURL(url);
+                
+                logEvent('Export', 'Saved to file');
+            } catch (error) {
+                logEvent('Error', `Save failed: ${error.message}`);
+                alert('Save failed: ' + error.message);
+            }
+        }
+
+        function loadFromFile() {
+            document.getElementById('file-input').click();
+        }
+
+        function handleFileLoad(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const geojsonText = e.target.result;
+                    const textarea = document.getElementById('geojson-data');
+                    textarea.value = geojsonText;
+                    
+                    logEvent('Import', `Loaded file: ${file.name}`);
+                    
+                    // Auto-import
+                    importGeoJSON();
+                } catch (error) {
+                    logEvent('Error', `File load failed: ${error.message}`);
+                    alert('File load failed: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset input
+            event.target.value = '';
+        }
+
+        // Listen to export/import events
+        map.on('pm:export', (e) => {
+            logEvent('pm:export', `${e.layers.length} layers exported`);
+        });
+
+        map.on('pm:import', (e) => {
+            logEvent('pm:import', `${e.layers.length} layers imported`);
+        });
+
+        // Log initial state
+        logEvent('System', 'Map initialized with all features');
+        logEvent('System', 'Click any tool in the toolbar to start drawing');
+        logEvent('System', 'Library mode enabled with sample data');
+        logEvent('System', 'GeoJSON import/export ready');
+    </script>
+</body>
+</html>
