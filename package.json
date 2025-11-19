@@ -1,6 +1,6 @@
 {
   "name": "leaflet-geoman-extended",
-  "version": "2.18.3",
+  "version": "2.18.4",
   "description": "Extended version of Leaflet-Geoman - A comprehensive Leaflet plugin for drawing, editing, and measuring geometry layers with advanced features",
   "keywords": [
     "leaflet",
