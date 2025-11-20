@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 env:
-  FILE_NAME_PREFIX: geoman-io-leaflet-geoman
+  FILE_NAME_PREFIX: leaflet-geoman-extended
 
 jobs:
   build:
@@ -66,13 +66,15 @@ jobs:
         with:
           name: ${{ steps.version.outputs.version }}
           tag_name: v${{ steps.version.outputs.version }}
-          token: ${{ secrets.GEOMAN_RELEASE_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             ${{env.FILE_NAME_PREFIX}}-${{ steps.version.outputs.version }}.tgz
             LICENSE
 
       - name: Publish to NPM
         run: npm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Merge changes from develop into master
         # Only run when a tag triggers the workflow

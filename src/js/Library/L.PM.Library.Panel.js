@@ -343,7 +343,11 @@ const Panel = L.Class.extend({
       'leaflet-pm-library-item-name',
       itemInfo
     );
-    itemName.textContent = item.id;
+    if (item.title === '') {
+      itemName.textContent = item.id;
+    }
+    itemName.textContent = item.title;
+    
 
     // Create item actions
     const itemActions = L.DomUtil.create(
